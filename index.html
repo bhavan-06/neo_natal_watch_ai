@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoNatal Watch AI — Clinical Decision Support & Telemetry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        clinical: {
+                            slate: '#f8fafc',
+                            card: '#ffffff',
+                            border: '#e2e8f0',
+                            navy: '#0f172a',
+                            charcoal: '#1e293b',
+                            teal: '#0284c7',
+                            emerald: '#059669',
+                            rose: '#dc2626',
+                            amber: '#d97706'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Consolas', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base typography & eye-comfort defaults */
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Clean healthcare light theme (default) */
+        body {
+            background-color: #f1f5f9; /* soft neutral slate */
+            color: #0f172a;            /* dark charcoal primary */
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Pure clean card surfaces — NO scanlines, NO glow, NO stripes */
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+        }
+        .card-hover:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.08);
+            transition: all 0.15s ease-in-out;
+        }
+        .card-sm {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        /* Semantic high-contrast status badges (never color alone) */
+        .status-stable {
+            background-color: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            font-weight: 600;
+        }
+        .status-attention {
+            background-color: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            font-weight: 600;
+        }
+        .status-high {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            font-weight: 600;
+        }
+        .status-info {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+            font-weight: 600;
+        }
+        .status-neutral {
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            font-weight: 600;
+        }
+
+        /* Tab navigation */
+        .tab-active {
+            border-bottom: 2px solid #0284c7;
+            color: #0284c7;
+            font-weight: 700;
+        }
+        .tab-inactive {
+            border-bottom: 2px solid transparent;
+            color: #475569;
+            font-weight: 500;
+        }
+        .tab-inactive:hover {
+            color: #0f172a;
+            background-color: #f8fafc;
+        }
+
+        /* Top Nav Links */
+        .nav-active {
+            color: #ffffff;
+            background-color: #0284c7;
+            font-weight: 600;
+        }
+        .nav-inactive {
+            color: #334155;
+            font-weight: 500;
+        }
+        .nav-inactive:hover {
+            color: #0f172a;
+            background-color: #e2e8f0;
+        }
+
+        /* Safety & Academic Disclaimer Banner */
+        .disclaimer-bar {
+            background-color: #fffbeb;
+            border-bottom: 1px solid #fcd34d;
+            color: #92400e;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Custom Scrollbar for eye comfort */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ================= DARK MODE OVERRIDES ================= */
+        html.dark body {
+            background-color: #0b1120;
+            color: #f8fafc;
+        }
+        html.dark .card {
+            background-color: #131f37;
+            border-color: #233554;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        }
+        html.dark .card-hover:hover {
+            border-color: #38bdf8;
+        }
+        html.dark .card-sm {
+            background-color: #0f172a;
+            border-color: #233554;
+        }
+        html.dark .status-stable {
+            background-color: #064e3b;
+            color: #6ee7b7;
+            border-color: #065f46;
+        }
+        html.dark .status-attention {
+            background-color: #451a03;
+            color: #fcd34d;
+            border-color: #78350f;
+        }
+        html.dark .status-high {
+            background-color: #450a0a;
+            color: #fca5a5;
+            border-color: #7f1d1d;
+        }
+        html.dark .status-info {
+            background-color: #1e3a5f;
+            color: #93c5fd;
+            border-color: #1e40af;
+        }
+        html.dark .status-neutral {
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+        html.dark .disclaimer-bar {
+            background-color: #291804;
+            border-bottom-color: #78350f;
+            color: #fde68a;
+        }
+        html.dark .nav-active {
+            background-color: #0284c7;
+            color: #ffffff;
+        }
+        html.dark .nav-inactive {
+            color: #94a3b8;
+        }
+        html.dark .nav-inactive:hover {
+            color: #ffffff;
+            background-color: #1e293b;
+        }
+        html.dark .tab-active {
+            border-bottom-color: #38bdf8;
+            color: #38bdf8;
+        }
+        html.dark .tab-inactive {
+            color: #94a3b8;
+        }
+        html.dark .tab-inactive:hover {
+            color: #ffffff;
+            background-color: #1e293b;
+        }
+        html.dark ::-webkit-scrollbar-track { background: #0b1120; }
+        html.dark ::-webkit-scrollbar-thumb { background: #334155; }
+        html.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel" src="frontend/app.jsx"></script>
+</body>
+</html>

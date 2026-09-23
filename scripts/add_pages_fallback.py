@@ -229,3 +229,4 @@ with open('frontend/app.jsx', 'w', encoding='utf-8') as f:
     f.write(content)
 
 print("Updated frontend/app.jsx successfully!")
+
