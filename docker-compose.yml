@@ -1,0 +1,42 @@
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: neonatal_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secure_local_password
+      MYSQL_DATABASE: neonatal_watch_ai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecure_local_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # NeoNatal Watch AI Web & API Service
+  app:
+    build: .
+    container_name: neonatal_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: neonatal_watch_ai
+      DB_USER: root
+      DB_PASSWORD: secure_local_password
+      HOST: 0.0.0.0
+      PORT: 8000
+      CORS_ORIGINS: "*"
+    ports:
+      - "8000:8000"
+
+volumes:
+  mysql_data:
