@@ -1,0 +1,6 @@
+id,pregnancy_id,newborn_code,birth_date,gestational_age_at_birth,birth_weight,birth_length,birth_status,created_at
+1001,101,SYN-NB-1001,2026-07-03 08:15:00,39.2,3350.0,50.0,healthy_live_birth,2026-07-03 09:00:00
+1002,102,SYN-NB-1002,2026-06-05 14:20:00,37.5,2450.0,46.5,small_for_gestational_age,2026-06-05 15:00:00
+1003,103,SYN-NB-1003,2026-04-28 09:45:00,35.8,2080.0,44.0,late_preterm_fgr,2026-04-28 10:30:00
+1004,104,SYN-NB-1004,2026-07-15 08:30:00,36.5,2550.0,47.0,near_term_infant,2026-07-15 09:15:00
+1005,105,SYN-NB-1005,2026-02-19 11:20:00,32.1,1620.0,41.0,very_preterm_infant,2026-02-19 12:00:00

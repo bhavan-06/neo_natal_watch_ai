@@ -1,0 +1,107 @@
+# .gitignore — NeoNatal Watch AI
+
+# ──────────────────────────────────────────
+# CRITICAL: Credentials & Secrets — NEVER COMMIT
+# ──────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.cert
+credentials.json
+
+# ──────────────────────────────────────────
+# Python Cache & Virtual Environments
+# ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ──────────────────────────────────────────
+# Local Database Files
+# ──────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+neonatal.db
+test_neonatal.db
+
+# ──────────────────────────────────────────
+# Jupyter Checkpoints
+# ──────────────────────────────────────────
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# ──────────────────────────────────────────
+# ML Model Artifacts:
+# Required models are explicitly preserved and tracked in Git (<2.5 MB total)
+# ──────────────────────────────────────────
+!models/ae_threshold.json
+!models/autoencoder.keras
+!models/cnn_lstm.keras
+!models/scaler.pkl
+!models/transformer.keras
+!models/xgboost_model.json
+!models/xgb_features.json
+!models/.gitkeep
+
+# ──────────────────────────────────────────
+# Large Raw & Processed Data
+# Exclude heavy training datasets (>10MB) to keep repository fast & light
+# ──────────────────────────────────────────
+data/raw/**/*.psv
+data/raw/**/*.dat
+data/raw/**/*.hea
+data/processed/*.parquet
+data/processed/*.csv
+data/processed/*.npy
+data/synthetic/synthetic_nicu_vitals.csv
+data/synthetic/per_patient/
+!data/**/.gitkeep
+!data/synthetic/*.csv
+!data/synthetic/*.json
+!data/synthetic/*.md
+data/synthetic/synthetic_nicu_vitals.csv
+
+# ──────────────────────────────────────────
+# Frontend & Node
+# ──────────────────────────────────────────
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env
+
+# ──────────────────────────────────────────
+# IDE & Operating System
+# ──────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ──────────────────────────────────────────
+# Logs & Temporary Files
+# ──────────────────────────────────────────
+logs/
+*.log
+*.bak
+*.old
+*.tmp

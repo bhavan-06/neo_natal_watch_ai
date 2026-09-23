@@ -1,0 +1,5 @@
+id,patient_id,newborn_id,nicu_admission_id,alert_type,severity,risk_score,triggering_factors,model_version,status,created_at,acknowledged_at,acknowledged_by
+5001,P-SYN-003,,,fgr_vascular_high_risk,medium,0.68,"Bilateral uterine artery notch, low PlGF (24.5 pg/mL), elevated MAP (96 mmHg).",v1.0-academic,acknowledged,2025-11-01 16:30:00,2025-11-01 16:45:00,DOC-MFM-01
+5002,P-SYN-004,,,maternal_comorbidity_high_risk,high,0.76,"Chronic hypertension (MAP 108 mmHg), pregestational diabetes, high UtA PI (1.95).",v1.0-academic,acknowledged,2026-01-10 12:30:00,2026-01-10 13:00:00,DOC-MFM-02
+5003,P-SYN-002,,,growth_deviation_flag,medium,0.62,Fetal growth trajectory dropped 26 percentile points between T1 prediction and T2 actual.,v1.0-academic,acknowledged,2026-02-02 12:00:00,2026-02-02 12:30:00,DOC-OBGYN-02
+5004,P-SYN-005,1005,2004,acute_neonatal_hypoxemia,high,0.88,Sustained oxygen desaturation below 85% (SpO2=83.0%) with reactive tachycardia (HR=174 bpm).,v1.0-academic,acknowledged,2026-02-19 17:30:00,2026-02-19 17:35:00,DOC-NEO-01

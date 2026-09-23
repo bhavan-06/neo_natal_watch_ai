@@ -1,0 +1,7 @@
+id,patient_id,pregnancy_id,newborn_id,nicu_admission_id,model_name,model_version,input_reference,output_type,output_value,confidence,explanation_reference,created_at
+4001,P-SYN-001,101,,,FGRNet-Tabular,v1.0-academic,assessment_301_features,fgr_probability,0.08,0.95,shap_p101_t1.json,2025-12-10 12:00:00
+4002,P-SYN-002,102,,,FGRNet-Tabular,v1.0-academic,assessment_303_features,fgr_probability,0.15,0.88,shap_p102_t1.json,2025-11-24 11:00:00
+4003,P-SYN-003,103,,,FGRNet-Vascular,v1.0-academic,assessment_305_features,vascular_fgr_risk,0.68,0.91,shap_p103_t1.json,2025-11-01 16:30:00
+4004,P-SYN-004,104,,,FGRNet-MaternalRisk,v1.0-academic,assessment_307_features,preeclampsia_fgr_risk,0.76,0.94,shap_p104_t1.json,2026-01-10 12:30:00
+4005,P-SYN-005,105,1005,2004,NICU-Autoencoder-Anomaly,v1.0-academic,vital_signs_window_3015_3020,vital_reconstruction_error,0.94,0.96,ae_reconstruction_error_p105.json,2026-02-19 17:30:00
+4006,P-SYN-005,105,1005,2004,NICU-Fusion-Deterioration,v1.0-academic,multimodal_telemetry_window,deterioration_probability,0.86,0.93,fusion_shap_p105.json,2026-02-19 17:30:00

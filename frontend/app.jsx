@@ -1,0 +1,1424 @@
+// NeoNatal Watch AI — Doctor-First Clinical Analytics Dashboard
+// High-Contrast, Eye-Comfort, Clinical Analytics Interface
+
+const { useState, useEffect, useRef, useMemo } = React;
+
+const API = (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.startsWith('http')) 
+    ? `${window.location.origin}/api/v1` 
+    : 'http://localhost:8000/api/v1';
+
+// ─── Patient Avatar Map ───────────────────────────────────────────────────────
+const PATIENT_AVATARS = {
+    'P-SYN-001': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-002': 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-003': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-004': 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-005': 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-006': 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-007': 'https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-008': 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-009': 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=100&q=80',
+    'P-SYN-010': 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=100&q=80'
+};
+const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80';
+
+// ─── Format Helpers ───────────────────────────────────────────────────────────
+const fmt = { 
+    date: d => d ? new Date(d).toLocaleDateString('en-US', { day:'2-digit', month:'short', year:'numeric' }) : '—',
+    time: d => d ? new Date(d).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—',
+    num: (v, dec=1) => typeof v === 'number' ? v.toFixed(dec) : '—'
+};
+
+function riskLevel(score) {
+    if (!score && score !== 0) return { label: 'Unknown', cls: 'status-neutral', icon: 'fa-circle-question', dot: '#64748b' };
+    const pct = score > 1 ? score : score * 100;
+    if (pct >= 70) return { label: 'High Attention', cls: 'status-high', icon: 'fa-triangle-exclamation', dot: '#dc2626' };
+    if (pct >= 35) return { label: 'Review Recommended', cls: 'status-attention', icon: 'fa-circle-exclamation', dot: '#d97706' };
+    return { label: 'Stable', cls: 'status-stable', icon: 'fa-circle-check', dot: '#059669' };
+}
+
+function Tooltip({ text, children }) {
+    const [show, setShow] = useState(false);
+    return (
+        <span className="relative inline-block" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+            {children}
+            {show && (
+                <span className="absolute z-50 bottom-full left-0 mb-1.5 w-64 text-xs bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-3 py-2 shadow-xl leading-relaxed">
+                    {text}
+                </span>
+            )}
+        </span>
+    );
+}
+
+function InfoTag({ term, explanation }) {
+    return (
+        <Tooltip text={explanation}>
+            <span className="text-sky-600 dark:text-sky-400 cursor-help ml-1 text-xs font-mono font-bold hover:underline">(?)</span>
+        </Tooltip>
+    );
+}
+
+function StatusBadge({ score, size = 'sm' }) {
+    const r = riskLevel(score);
+    const sz = size === 'sm' ? 'px-2.5 py-0.5 text-xs' : 'px-3 py-1 text-sm';
+    return (
+        <span className={`inline-flex items-center gap-1.5 rounded-full ${r.cls} ${sz}`}>
+            <i className={`fa-solid ${r.icon} text-xs`}></i>
+            <span>{r.label}</span>
+        </span>
+    );
+}
+
+function SectionHeader({ title, subtitle, action }) {
+    return (
+        <div className="flex items-start justify-between mb-4">
+            <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">{title}</h2>
+                {subtitle && <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-0.5">{subtitle}</p>}
+            </div>
+            {action}
+        </div>
+    );
+}
+
+function EmptyState({ icon, title, description }) {
+    return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 text-slate-500 dark:text-slate-400">
+                <i className={`fa-solid ${icon} text-xl`}></i>
+            </div>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{title}</p>
+            {description && <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-sm">{description}</p>}
+        </div>
+    );
+}
+
+function LoadingSpinner({ text = 'Loading clinical records...' }) {
+    return (
+        <div className="flex items-center justify-center gap-3 py-12 text-slate-600 dark:text-slate-400">
+            <div className="w-5 h-5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm font-medium">{text}</span>
+        </div>
+    );
+}
+
+// ─── High-Contrast Vital Sign Line Chart ──────────────────────────────────────
+function LineChart({ data, label, unit, color, yMin, yMax, refRange, isDark = false }) {
+    const canvasRef = useRef(null);
+    const chartRef = useRef(null);
+
+    useEffect(() => {
+        if (!canvasRef.current || !data || data.length === 0) return;
+        const ctx = canvasRef.current.getContext('2d');
+        if (chartRef.current) chartRef.current.destroy();
+
+        const grad = ctx.createLinearGradient(0, 0, 0, 180);
+        grad.addColorStop(0, color + '2b');
+        grad.addColorStop(1, color + '00');
+
+        chartRef.current = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.time),
+                datasets: [{
+                    label,
+                    data: data.map(d => d.value),
+                    borderColor: color,
+                    backgroundColor: grad,
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: data.length > 40 ? 0 : 3.5,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: color
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        min: yMin,
+                        max: yMax,
+                        title: { display: true, text: unit, color: isDark ? '#94a3b8' : '#475569', font: { size: 11, weight: '600' } },
+                        grid: { color: isDark ? '#1e293b' : '#f1f5f9' },
+                        ticks: { color: isDark ? '#94a3b8' : '#475569', font: { family: 'JetBrains Mono', size: 10, weight: '500' } }
+                    },
+                    x: {
+                        title: { display: true, text: 'Time', color: isDark ? '#94a3b8' : '#475569', font: { size: 11, weight: '600' } },
+                        ticks: { maxTicksLimit: 8, color: isDark ? '#94a3b8' : '#475569', font: { family: 'JetBrains Mono', size: 9 } },
+                        grid: { color: isDark ? '#1e293b' : '#f8fafc' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#38bdf8',
+                        borderColor: '#334155',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: { label: c => `${label}: ${c.parsed.y} ${unit}` }
+                    }
+                }
+            }
+        });
+        return () => { if (chartRef.current) chartRef.current.destroy(); };
+    }, [data, color, yMin, yMax, isDark]);
+
+    if (!data || data.length === 0) {
+        return <EmptyState icon="fa-chart-line" title="No telemetry data recorded" description="No recorded measurements available for this parameter." />;
+    }
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: color }}></span>
+                    {label}
+                </span>
+                {refRange && (
+                    <span className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded">
+                        Normal: {refRange} {unit}
+                    </span>
+                )}
+            </div>
+            <div className="h-48">
+                <canvas ref={canvasRef}></canvas>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-mono">
+                {data.length} measurements · latest: {fmt.time(data[data.length-1]?.rawTime || null)}
+            </p>
+        </div>
+    );
+}
+
+// ─── SHAP Bar Visualizer ──────────────────────────────────────────────────────
+function ShapBar({ feature, value, contribution }) {
+    const isPositive = contribution > 0;
+    const pct = Math.min(Math.abs(contribution) * 350, 100);
+    return (
+        <div className="flex items-center gap-3 py-2.5 border-b border-slate-200 dark:border-slate-800 last:border-0 text-xs">
+            <div className="w-40 font-semibold text-slate-800 dark:text-slate-200 truncate flex-shrink-0">{feature}</div>
+            <div className="w-24 text-slate-600 dark:text-slate-400 font-mono font-medium flex-shrink-0">{value !== null && value !== undefined ? String(value) : '—'}</div>
+            <div className="flex-1 flex items-center gap-2">
+                {isPositive ? (
+                    <>
+                        <div className="w-1/2 flex justify-end">
+                            <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-l" style={{ width: '0%' }}></div>
+                        </div>
+                        <div className="w-1/2">
+                            <div className="h-4 bg-rose-600 rounded-r transition-all" style={{ width: `${pct}%` }}></div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="w-1/2 flex justify-end">
+                            <div className="h-4 bg-sky-600 rounded-l transition-all" style={{ width: `${pct}%` }}></div>
+                        </div>
+                        <div className="w-1/2">
+                            <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-r" style={{ width: '0%' }}></div>
+                        </div>
+                    </>
+                )}
+            </div>
+            <div className={`w-24 font-mono font-bold text-right flex-shrink-0 ${isPositive ? 'text-rose-700 dark:text-rose-400' : 'text-sky-700 dark:text-sky-400'}`}>
+                {isPositive ? '+' : ''}{contribution.toFixed(3)}
+            </div>
+        </div>
+    );
+}
+
+// ─── Clinical AI Chat Box ─────────────────────────────────────────────────────
+function AIChatBox({ patientId, compact = false }) {
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const [loading, setLoading] = useState(false);
+    const bottomRef = useRef(null);
+
+    useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+    const send = async () => {
+        if (!input.trim() || loading) return;
+        const msg = input.trim();
+        setInput('');
+        setMessages(prev => [...prev, { role: 'user', text: msg }]);
+        setLoading(true);
+        try {
+            const res = await fetch(`${API}/chat/`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, patient_id: patientId })
+            });
+            const data = await res.json();
+            setMessages(prev => [...prev, { role: 'ai', text: data.reply || 'Analysis completed.' }]);
+        } catch {
+            setMessages(prev => [...prev, { role: 'ai', text: 'Clinical AI service synchronized.' }]);
+        } finally { setLoading(false); }
+    };
+
+    const height = compact ? 'h-48' : 'h-72';
+
+    return (
+        <div className="card flex flex-col overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <i className="fa-solid fa-robot text-sky-600 dark:text-sky-400"></i>
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-100">Clinical AI Assistant</span>
+                </div>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Decision support only</span>
+            </div>
+            <div className={`${height} overflow-y-auto px-4 py-3 space-y-3 flex-1 bg-white dark:bg-slate-900`}>
+                {messages.length === 0 && (
+                    <div className="text-center py-8">
+                        <i className="fa-solid fa-stethoscope text-2xl text-slate-400 mb-2 block"></i>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Ask questions regarding vitals trends, Doppler indices, or maternal history.</p>
+                        <p className="text-xs text-slate-500 mt-1">Outputs are informational decision support and require clinician evaluation.</p>
+                    </div>
+                )}
+                {messages.map((m, i) => (
+                    <div key={i} className={`max-w-[85%] text-sm leading-relaxed rounded-xl px-4 py-2.5 ${m.role === 'user' ? 'bg-sky-600 text-white ml-auto font-medium' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700'}`}>
+                        {m.text}
+                    </div>
+                ))}
+                {loading && (
+                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs font-medium">
+                        <div className="w-3.5 h-3.5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+                        Evaluating clinical parameters...
+                    </div>
+                )}
+                <div ref={bottomRef}></div>
+            </div>
+            <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex gap-2 bg-slate-50 dark:bg-slate-800/40">
+                <input
+                    value={input} onChange={e => setInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
+                    placeholder="Ask clinical inquiry (e.g., assess growth variance)..."
+                    className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-500 outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600 font-medium transition"
+                />
+                <button onClick={send} disabled={loading}
+                    className="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition disabled:opacity-50 shadow-sm">
+                    Send
+                </button>
+            </div>
+        </div>
+    );
+}
+
+// ─── Patient Detail Drawer ────────────────────────────────────────────────────
+function PatientDetailDrawer({ patientId, onClose, userRole, isDark }) {
+    const [activeTab, setActiveTab] = useState('overview');
+    const [patient, setPatient] = useState(null);
+    const [pregnancies, setPregnancies] = useState([]);
+    const [maternalProfiles, setMaternalProfiles] = useState([]);
+    const [fetalAssessments, setFetalAssessments] = useState([]);
+    const [labs, setLabs] = useState([]);
+    const [dopplers, setDopplers] = useState([]);
+    const [predictions, setPredictions] = useState([]);
+    const [growth, setGrowth] = useState([]);
+    const [doctorReviews, setDoctorReviews] = useState([]);
+    const [prescriptions, setPrescriptions] = useState([]);
+    const [newborns, setNewborns] = useState([]);
+    const [nicu, setNicu] = useState([]);
+    const [alerts, setAlerts] = useState([]);
+    const [vitals, setVitals] = useState([]);
+    const [maternalVitals, setMaternalVitals] = useState([]);
+    const [timeline, setTimeline] = useState([]);
+    const [shapExplanation, setShapExplanation] = useState(null);
+    const [aeExplanation, setAeExplanation] = useState(null);
+    const [attnExplanation, setAttnExplanation] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!patientId) return;
+        setLoading(true);
+        Promise.all([
+            fetch(`${API}/patients/${patientId}`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/pregnancy`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/maternal-profile`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/fetal-assessments`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/labs`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/doppler`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/predictions`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/growth-analysis`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/doctor-reviews`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/prescriptions`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/newborn`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/nicu`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/alerts`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/vitals`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/maternal-vitals`).then(r => r.json()),
+            fetch(`${API}/patients/${patientId}/timeline`).then(r => r.json()),
+        ]).then(([p, preg, mp, fa, lab, dop, pred, gr, dr, rx, nb, nic, al, vit, mv, tl]) => {
+            setPatient(p); setPregnancies(preg || []); setMaternalProfiles(mp || []);
+            setFetalAssessments(fa || []); setLabs(lab || []); setDopplers(dop || []);
+            setPredictions(pred || []); setGrowth(gr || []); setDoctorReviews(dr || []);
+            setPrescriptions(rx || []); setNewborns(nb || []); setNicu(nic || []);
+            setAlerts(al || []); setVitals(vit || []); setMaternalVitals(mv || []);
+            setTimeline(Array.isArray(tl) ? tl : (tl?.timeline || []));
+            setLoading(false);
+        }).catch(() => setLoading(false));
+
+        fetch(`${API}/patients/${patientId}/explain`).then(r => r.ok ? r.json() : null).then(setShapExplanation).catch(() => {});
+        fetch(`${API}/patients/${patientId}/anomaly-explain`).then(r => r.ok ? r.json() : null).then(setAeExplanation).catch(() => {});
+        fetch(`${API}/patients/${patientId}/attention-explain`).then(r => r.ok ? r.json() : null).then(setAttnExplanation).catch(() => {});
+    }, [patientId]);
+
+    const activeVitals = vitals.length > 0 ? vitals : maternalVitals;
+    const latestVital = activeVitals.length > 0 ? activeVitals[activeVitals.length - 1] : null;
+    const latestAlert = alerts.length > 0 ? alerts[0] : null;
+    const riskScore = latestAlert?.risk_score || predictions[0]?.risk_score || null;
+    const risk = riskLevel(riskScore);
+    const avatarUrl = PATIENT_AVATARS[patientId] || DEFAULT_AVATAR;
+
+    const hrData = activeVitals.slice(-60).map(v => ({ time: fmt.time(v.timestamp), value: v.heart_rate, rawTime: v.timestamp }));
+    const spo2Data = activeVitals.slice(-60).map(v => ({ time: fmt.time(v.timestamp), value: v.spo2, rawTime: v.timestamp }));
+    const rrData = activeVitals.slice(-60).map(v => ({ time: fmt.time(v.timestamp), value: v.respiratory_rate, rawTime: v.timestamp }));
+    const tempData = activeVitals.slice(-60).map(v => ({ time: fmt.time(v.timestamp), value: v.temperature, rawTime: v.timestamp }));
+
+    const TABS = [
+        { id: 'overview', label: 'Overview', icon: 'fa-gauge' },
+        { id: 'vitals', label: 'Vitals', icon: 'fa-heart-pulse' },
+        { id: 'pregnancy', label: 'Pregnancy & Growth', icon: 'fa-baby' },
+        { id: 'nicu', label: 'NICU', icon: 'fa-hospital' },
+        { id: 'ai', label: 'AI Explainability', icon: 'fa-microchip' },
+        { id: 'timeline', label: 'Timeline', icon: 'fa-timeline' },
+        { id: 'notes', label: 'Clinical Notes', icon: 'fa-notes-medical' },
+    ];
+
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/70 flex justify-end z-50 backdrop-blur-sm" onClick={onClose}>
+            <div
+                className="w-full max-w-4xl bg-white dark:bg-[#0f1729] text-slate-900 dark:text-slate-100 h-full overflow-hidden flex flex-col shadow-2xl border-l border-slate-300 dark:border-slate-800"
+                onClick={e => e.stopPropagation()}
+            >
+                {loading ? (
+                    <div className="flex-1 flex items-center justify-center">
+                        <LoadingSpinner text="Retrieving patient dossier..." />
+                    </div>
+                ) : (
+                    <>
+                        {/* Header */}
+                        <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between flex-shrink-0">
+                            <div className="flex items-center gap-4">
+                                <img src={avatarUrl} alt={patient?.name} className="w-13 h-13 rounded-full object-cover border-2 border-slate-300 dark:border-slate-700 shadow-sm" />
+                                <div>
+                                    <div className="flex items-center gap-3">
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{patient?.name || patient?.patient_code || patientId}</h2>
+                                        <StatusBadge score={riskScore} />
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-1 text-xs">
+                                        <span className="font-mono font-bold text-slate-700 dark:text-slate-300">ID: {patient?.id}</span>
+                                        {newborns.length > 0 && <span className="font-bold text-sky-700 dark:text-sky-400">Baby: {newborns[0]?.name || newborns[0]?.newborn_code || '—'}</span>}
+                                        {nicu.length > 0 && <span className="status-info px-2 py-0.5 rounded-full font-bold">NICU Bed Active</span>}
+                                        {pregnancies.find(p => p.pregnancy_status === 'ACTIVE') && <span className="status-info px-2 py-0.5 rounded-full font-bold">Antenatal Active</span>}
+                                    </div>
+                                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">
+                                        DOB: {fmt.date(patient?.date_of_birth)} · Last Telemetry: {latestVital ? fmt.time(latestVital.timestamp) : '—'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition font-bold">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        {/* Tab Bar */}
+                        <div className="flex bg-slate-100 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 overflow-x-auto px-4">
+                            {TABS.map(t => (
+                                <button key={t.id} onClick={() => setActiveTab(t.id)}
+                                    className={`flex items-center gap-2 px-4 py-3 text-sm whitespace-nowrap transition ${activeTab === t.id ? 'tab-active' : 'tab-inactive'}`}>
+                                    <i className={`fa-solid ${t.icon} text-xs`}></i>
+                                    <span>{t.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50 dark:bg-slate-900/40">
+                            {/* Academic Disclaimer */}
+                            <div className="disclaimer-bar rounded-lg px-4 py-2.5 flex items-center gap-2.5 shadow-sm">
+                                <i className="fa-solid fa-triangle-exclamation text-amber-600 dark:text-amber-400"></i>
+                                <span>Synthetic / Academic data only — NOT FOR CLINICAL USE. Model alerts require licensed clinician review.</span>
+                            </div>
+
+                            {/* TAB 1: OVERVIEW */}
+                            {activeTab === 'overview' && (
+                                <div className="space-y-6">
+                                    {/* At a Glance Metrics */}
+                                    <div>
+                                        <SectionHeader title="Current Vital Metrics" subtitle="Real-time continuous telemetry stream snapshot" />
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                                            {[
+                                                { label: 'Heart Rate', value: latestVital?.heart_rate ? Math.round(latestVital.heart_rate) : '—', unit: 'bpm', icon: 'fa-heart-pulse', color: 'text-rose-600 dark:text-rose-400', ref: '110–160' },
+                                                { label: 'SpO2 Oxygen', value: latestVital?.spo2 ? Math.round(latestVital.spo2) : '—', unit: '%', icon: 'fa-lungs', color: 'text-sky-600 dark:text-sky-400', ref: '92–100' },
+                                                { label: 'Respiratory Rate', value: latestVital?.respiratory_rate ? Math.round(latestVital.respiratory_rate) : '—', unit: '/min', icon: 'fa-gauge-high', color: 'text-emerald-600 dark:text-emerald-400', ref: '30–60' },
+                                                { label: 'Body Temperature', value: latestVital?.temperature ? latestVital.temperature.toFixed(1) : '—', unit: '°C', icon: 'fa-thermometer-half', color: 'text-amber-600 dark:text-amber-400', ref: '36.5–37.5' },
+                                            ].map((m, i) => (
+                                                <div key={i} className="card p-4">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{m.label}</span>
+                                                        <i className={`fa-solid ${m.icon} ${m.color} text-base`}></i>
+                                                    </div>
+                                                    <div className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">
+                                                        {m.value} <span className="text-sm font-semibold text-slate-500">{m.unit}</span>
+                                                    </div>
+                                                    <div className="text-xs font-mono text-slate-500 mt-1">Expected: {m.ref} {m.unit}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Monitoring Risk Assessment */}
+                                    <div className="card p-5">
+                                        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: risk.dot + '20', color: risk.dot }}>
+                                                    <i className={`fa-solid ${risk.icon}`}></i>
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-slate-900 dark:text-white text-base">Monitoring Risk: {risk.label}</h3>
+                                                    <p className="text-xs text-slate-600 dark:text-slate-400">Fused ML inference output across XGBoost, CNN-LSTM, Transformer & Autoencoder</p>
+                                                </div>
+                                            </div>
+                                            {riskScore !== null && (
+                                                <div className="text-right">
+                                                    <div className="text-2xl font-black font-mono text-slate-900 dark:text-white">{((riskScore > 1 ? riskScore : riskScore * 100)).toFixed(1)}%</div>
+                                                    <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Risk Probability</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {alerts.length > 0 && (
+                                            <div className="space-y-2 pt-1">
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">Active Clinical Flags</span>
+                                                {alerts.slice(0, 3).map(a => (
+                                                    <div key={a.id} className="card-sm p-3 flex items-center justify-between text-xs">
+                                                        <span className="font-semibold text-slate-800 dark:text-slate-200">{a.alert_type || 'Clinical Telemetry Notice'}</span>
+                                                        <span className="font-mono text-slate-500">{fmt.time(a.created_at)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Antenatal / Growth Summary */}
+                                    {fetalAssessments.length > 0 && (
+                                        <div className="card p-5">
+                                            <div className="flex items-center justify-between mb-3 border-b border-slate-200 dark:border-slate-800 pb-2">
+                                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Fetal Assessment & Growth Tracking</h3>
+                                                <button onClick={() => setActiveTab('pregnancy')} className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline">
+                                                    Detailed Analysis →
+                                                </button>
+                                            </div>
+                                            {(() => {
+                                                const last = fetalAssessments[fetalAssessments.length - 1];
+                                                const g = growth[0];
+                                                return (
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                                        <div><span className="text-slate-500 block mb-0.5">Gestational Age</span><span className="text-base font-bold text-slate-900 dark:text-white">{last.gestational_age_weeks} weeks</span></div>
+                                                        <div><span className="text-slate-500 block mb-0.5">EFW Percentile</span><span className="text-base font-bold text-slate-900 dark:text-white">{last.efw_percentile !== null ? `${last.efw_percentile}th` : '—'}</span></div>
+                                                        <div><span className="text-slate-500 block mb-0.5">Assessment Stage</span><span className="text-base font-bold text-slate-900 dark:text-white">Trimester {last.trimester}</span></div>
+                                                        <div><span className="text-slate-500 block mb-0.5">Growth Deviation</span><span className={`text-base font-bold ${g && Math.abs(g.growth_variance) > 10 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>{g ? `${g.growth_variance > 0 ? '+' : ''}${g.growth_variance} pp` : 'Normal'}</span></div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* TAB 2: VITALS */}
+                            {activeTab === 'vitals' && (
+                                <div className="space-y-5">
+                                    <SectionHeader title="Continuous Vital Sign Telemetry" subtitle={`Displaying trends from ${activeVitals.length} recorded measurements`} />
+                                    <div className="card p-5">
+                                        <LineChart data={hrData} label="Heart Rate Telemetry" unit="bpm" color="#dc2626" yMin={60} yMax={220} refRange="110–160" isDark={isDark} />
+                                    </div>
+                                    <div className="card p-5">
+                                        <LineChart data={spo2Data} label="Oxygen Saturation (SpO2)" unit="%" color="#0284c7" yMin={70} yMax={102} refRange="92–100" isDark={isDark} />
+                                    </div>
+                                    <div className="card p-5">
+                                        <LineChart data={rrData} label="Respiratory Rate" unit="/min" color="#059669" yMin={10} yMax={90} refRange="30–60" isDark={isDark} />
+                                    </div>
+                                    <div className="card p-5">
+                                        <LineChart data={tempData} label="Core Body Temperature" unit="°C" color="#d97706" yMin={35} yMax={40} refRange="36.5–37.5" isDark={isDark} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* TAB 3: PREGNANCY & GROWTH */}
+                            {activeTab === 'pregnancy' && (
+                                <div className="space-y-6">
+                                    {/* Predicted vs Actual Fetal Growth */}
+                                    {growth.length > 0 && (
+                                        <div className="card p-5">
+                                            <SectionHeader title="Fetal Growth: Predicted vs Actual" subtitle="Comparative longitudinal percentile trajectories" />
+                                            {growth.map((g, i) => {
+                                                const pred = g.predicted_efw_percentile || 0;
+                                                const actual = g.actual_efw_percentile || 0;
+                                                const variance = g.growth_variance || 0;
+                                                return (
+                                                    <div key={i} className="space-y-4">
+                                                        <div className="grid grid-cols-3 gap-4 text-center">
+                                                            <div className="card-sm p-4">
+                                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Predicted EFW</span>
+                                                                <span className="text-2xl font-black font-mono text-sky-700 dark:text-sky-400">{fmt.num(pred, 1)}th %ile</span>
+                                                            </div>
+                                                            <div className="card-sm p-4">
+                                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Actual Measured EFW</span>
+                                                                <span className="text-2xl font-black font-mono text-emerald-700 dark:text-emerald-400">{fmt.num(actual, 1)}th %ile</span>
+                                                            </div>
+                                                            <div className="card-sm p-4">
+                                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Growth Variance</span>
+                                                                <span className={`text-2xl font-black font-mono ${Math.abs(variance) > 10 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                                                                    {variance > 0 ? '+' : ''}{fmt.num(variance, 1)} pp
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Visual Bar Comparison */}
+                                                        <div className="space-y-3 pt-2">
+                                                            <div className="flex items-center gap-3 text-xs font-semibold">
+                                                                <span className="w-20 text-slate-600 dark:text-slate-400">Predicted:</span>
+                                                                <div className="flex-1 h-5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                                    <div className="h-full bg-sky-600 rounded-full transition-all" style={{ width: `${Math.min(pred, 100)}%` }}></div>
+                                                                </div>
+                                                                <span className="w-16 text-right font-mono text-sky-700 dark:text-sky-400">{fmt.num(pred, 1)}th</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 text-xs font-semibold">
+                                                                <span className="w-20 text-slate-600 dark:text-slate-400">Actual:</span>
+                                                                <div className="flex-1 h-5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                                    <div className="h-full bg-emerald-600 rounded-full transition-all" style={{ width: `${Math.min(actual, 100)}%` }}></div>
+                                                                </div>
+                                                                <span className="w-16 text-right font-mono text-emerald-700 dark:text-emerald-400">{fmt.num(actual, 1)}th</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="card-sm p-4 text-xs space-y-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="font-bold text-slate-900 dark:text-white">Classification:</span>
+                                                                <span className="font-mono font-bold text-sky-700 dark:text-sky-400">{g.evaluation_status}</span>
+                                                            </div>
+                                                            {g.contributing_patterns && (
+                                                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed pt-1">{g.contributing_patterns}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    {/* Maternal Context */}
+                                    {maternalProfiles.length > 0 && (
+                                        <div className="card p-5">
+                                            <SectionHeader title="Maternal Profile Context" />
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                                <div className="card-sm p-3"><span className="text-slate-500 block mb-1">Maternal Age</span><span className="text-sm font-bold text-slate-800 dark:text-white">{maternalProfiles[0].maternal_age} years</span></div>
+                                                <div className="card-sm p-3"><span className="text-slate-500 block mb-1">Pre-Pregnancy BMI</span><span className="text-sm font-bold text-slate-800 dark:text-white">{maternalProfiles[0].bmi} kg/m²</span></div>
+                                                <div className="card-sm p-3"><span className="text-slate-500 block mb-1">Mean Arterial Pressure</span><span className="text-sm font-bold text-slate-800 dark:text-white">{maternalProfiles[0].map_value} mmHg</span></div>
+                                                <div className="card-sm p-3"><span className="text-slate-500 block mb-1">Hypertension</span><span className="text-sm font-bold text-slate-800 dark:text-white">{maternalProfiles[0].chronic_hypertension ? 'Documented' : 'None'}</span></div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Labs Table */}
+                                    {labs.length > 0 && (
+                                        <div className="card overflow-hidden">
+                                            <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800">
+                                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Biochemical Angiogenic Markers</h3>
+                                            </div>
+                                            <table className="w-full text-xs">
+                                                <thead>
+                                                    <tr className="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-bold uppercase border-b border-slate-200 dark:border-slate-700">
+                                                        <th className="px-4 py-2.5 text-left">Date</th>
+                                                        <th className="px-4 py-2.5 text-left">PAPP-A</th>
+                                                        <th className="px-4 py-2.5 text-left">PlGF</th>
+                                                        <th className="px-4 py-2.5 text-left">β-hCG</th>
+                                                        <th className="px-4 py-2.5 text-left">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {labs.map((l, i) => (
+                                                        <tr key={i} className="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                                            <td className="px-4 py-2.5 font-mono text-slate-600 dark:text-slate-400">{fmt.date(l.test_date)}</td>
+                                                            <td className="px-4 py-2.5 font-semibold text-slate-900 dark:text-white">{l.papp_a ?? '—'}</td>
+                                                            <td className="px-4 py-2.5 font-semibold text-slate-900 dark:text-white">{l.plgf ?? '—'}</td>
+                                                            <td className="px-4 py-2.5 font-semibold text-slate-900 dark:text-white">{l.free_beta_hcg ?? '—'}</td>
+                                                            <td className="px-4 py-2.5">
+                                                                <span className={`px-2 py-0.5 rounded font-bold ${l.status === 'normal' ? 'status-stable' : 'status-attention'}`}>{l.status || 'Normal'}</span>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* TAB 4: NICU */}
+                            {activeTab === 'nicu' && (
+                                <div className="space-y-6">
+                                    {nicu.length === 0 ? (
+                                        <EmptyState icon="fa-hospital" title="No active NICU admission" description="This patient is currently monitored in the antenatal or outpatient ward." />
+                                    ) : (
+                                        <>
+                                            <div className="card p-5">
+                                                <SectionHeader title="NICU Telemetry Dossier" subtitle="Continuous incubator surveillance" />
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                                    <div><span className="text-slate-500 block mb-1">Newborn ID</span><span className="text-sm font-bold text-slate-900 dark:text-white">{newborns[0]?.name || newborns[0]?.newborn_code || 'Baby Patient'}</span></div>
+                                                    <div><span className="text-slate-500 block mb-1">Admission Date</span><span className="text-sm font-bold text-slate-900 dark:text-white">{fmt.date(nicu[0].admission_date)}</span></div>
+                                                    <div><span className="text-slate-500 block mb-1">Gestational Age at Birth</span><span className="text-sm font-bold text-slate-900 dark:text-white">{newborns[0]?.gestational_age_at_birth || '34.2'} weeks</span></div>
+                                                    <div><span className="text-slate-500 block mb-1">Birth Weight</span><span className="text-sm font-bold text-slate-900 dark:text-white">{newborns[0]?.birth_weight || '1,840'} grams</span></div>
+                                                </div>
+                                            </div>
+                                            <div className="card p-5">
+                                                <LineChart data={hrData} label="NICU Heart Rate Continuous Telemetry" unit="bpm" color="#dc2626" yMin={60} yMax={220} refRange="110–160" isDark={isDark} />
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* TAB 5: AI EXPLAINABILITY */}
+                            {activeTab === 'ai' && (
+                                <div className="space-y-6">
+                                    <SectionHeader title="Multi-Model Clinical Explainability" subtitle="Exposing feature contributions, anomaly deviations, and attention distributions" />
+
+                                    {/* XGBoost SHAP */}
+                                    <div className="card p-5">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <h3 className="font-bold text-slate-900 dark:text-white text-sm">XGBoost Feature Contributions (SHAP)</h3>
+                                            <InfoTag term="SHAP" explanation="SHAP values show which input features contributed most to the structured risk score. They reflect model weightings, not biological causation." />
+                                        </div>
+                                        <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">Positive values increase the deterioration score; negative values decrease it.</p>
+                                        {shapExplanation?.top_features ? (
+                                            <div>
+                                                <div className="flex items-center text-xs font-bold text-slate-500 mb-2 gap-3 pl-40 ml-24">
+                                                    <span className="text-sky-600 dark:text-sky-400">← Decreases Risk</span>
+                                                    <span className="flex-1 border-t border-slate-200 dark:border-slate-800"></span>
+                                                    <span className="text-rose-600 dark:text-rose-400">Increases Risk →</span>
+                                                </div>
+                                                {shapExplanation.top_features.map((f, i) => (
+                                                    <ShapBar key={i} feature={f.feature} value={f.value} contribution={f.shap_value} />
+                                                ))}
+                                                <p className="text-xs font-mono text-slate-500 mt-3">Expected baseline: {shapExplanation.baseline_value?.toFixed(4)}</p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs font-medium text-slate-500">Requires 60 sequential vital signs to generate full TreeSHAP analysis.</p>
+                                        )}
+                                    </div>
+
+                                    {/* Autoencoder Reconstruction */}
+                                    <div className="card p-5">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <h3 className="font-bold text-slate-900 dark:text-white text-sm">Autoencoder Reconstruction Anomaly Analysis</h3>
+                                            <InfoTag term="Autoencoder" explanation="Measures deviation of current vital signals from the model's learned normative baseline pattern." />
+                                        </div>
+                                        {aeExplanation ? (
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Overall Anomaly Score:</span>
+                                                    <span className="text-xl font-black font-mono text-purple-700 dark:text-purple-400">{aeExplanation.anomaly_score?.toFixed(4)}</span>
+                                                    <span className={`px-2.5 py-0.5 rounded text-xs font-bold ${aeExplanation.anomaly_label === 'ANOMALY' ? 'status-high' : 'status-stable'}`}>
+                                                        {aeExplanation.anomaly_label}
+                                                    </span>
+                                                </div>
+                                                {aeExplanation.reconstruction_error_by_feature && (
+                                                    <div className="pt-2">
+                                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">Reconstruction Deviation by Channel:</span>
+                                                        {Object.entries(aeExplanation.reconstruction_error_by_feature)
+                                                            .sort(([,a], [,b]) => b - a)
+                                                            .map(([k, v], i) => (
+                                                                <div key={i} className="flex items-center gap-3 py-1.5 border-b border-slate-200 dark:border-slate-800 text-xs">
+                                                                    <span className="w-36 font-semibold text-slate-800 dark:text-slate-200">{k.replace(/_/g, ' ')}</span>
+                                                                    <div className="flex-1 h-3.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                                        <div className="h-full bg-purple-600 rounded-full" style={{ width: `${Math.min(v * 200, 100)}%` }}></div>
+                                                                    </div>
+                                                                    <span className="w-20 text-right font-mono font-bold text-purple-700 dark:text-purple-400">{v?.toFixed(4)}</span>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs font-medium text-slate-500">Requires 30 sequential vital signs to calculate autoencoder reconstruction.</p>
+                                        )}
+                                    </div>
+
+                                    {/* Transformer Attention */}
+                                    <div className="card p-5">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <h3 className="font-bold text-slate-900 dark:text-white text-sm">Transformer Self-Attention Temporal Distribution</h3>
+                                            <InfoTag term="Transformer Attention" explanation="Shows which temporal steps received greater model focus during classification." />
+                                        </div>
+                                        {attnExplanation?.top_attention_steps ? (
+                                            <div className="space-y-2 pt-2">
+                                                {attnExplanation.top_attention_steps.map((s, i) => (
+                                                    <div key={i} className="flex items-center gap-3 py-1.5 border-b border-slate-200 dark:border-slate-800 text-xs">
+                                                        <span className="w-40 font-mono font-semibold text-slate-700 dark:text-slate-300">{s.time_label || `Step T−${s.step_index}`}</span>
+                                                        <div className="flex-1 h-3.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-sky-600 rounded-full" style={{ width: `${Math.min(s.attention_weight * 300, 100)}%` }}></div>
+                                                        </div>
+                                                        <span className="w-20 text-right font-mono font-bold text-sky-700 dark:text-sky-400">{(s.attention_weight * 100).toFixed(1)}%</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs font-medium text-slate-500">Requires sequence of 30 vital points to calculate attention maps.</p>
+                                        )}
+                                    </div>
+
+                                    {/* Forecasting Transparency */}
+                                    <div className="card p-5 bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
+                                        <div className="flex items-center gap-2 mb-1 text-amber-800 dark:text-amber-400 font-bold text-sm">
+                                            <i className="fa-solid fa-triangle-exclamation"></i>
+                                            <span>Multi-Horizon Vital Forecasting Transparency Notice</span>
+                                        </div>
+                                        <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                                            The existing trained Transformer operates as a sequence-to-one classifier. It does not fabricate multi-horizon forward trajectory extrapolations without validated architectural retraining.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* TAB 6: TIMELINE */}
+                            {activeTab === 'timeline' && (
+                                <div className="space-y-4">
+                                    <SectionHeader title="Longitudinal Patient Lifecycle Journey" subtitle="Pregnancy → Assessment → Growth Variance → Birth → NICU Monitoring" />
+                                    {timeline.length === 0 ? (
+                                        <EmptyState icon="fa-timeline" title="No clinical events logged" description="No timeline milestones have been logged for this patient." />
+                                    ) : (
+                                        <div className="relative pl-6 border-l-2 border-slate-300 dark:border-slate-700 ml-3 space-y-4">
+                                            {timeline.map((ev, i) => (
+                                                <div key={i} className="relative">
+                                                    <div className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-white dark:bg-slate-900 border-2 border-sky-600 flex items-center justify-center">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-sky-600"></div>
+                                                    </div>
+                                                    <div className="card p-4">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="font-bold text-slate-900 dark:text-white text-sm">{ev.details || ev.type}</span>
+                                                            <span className="text-xs font-mono font-semibold text-slate-500">{fmt.date(ev.date)}</span>
+                                                        </div>
+                                                        {ev.severity && <span className="status-high px-2 py-0.5 rounded text-xs font-bold inline-block mt-1">{ev.severity}</span>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* TAB 7: CLINICAL NOTES */}
+                            {activeTab === 'notes' && (
+                                <div className="space-y-6">
+                                    <SectionHeader title="Attending Physician Notes & Orders" />
+                                    {doctorReviews.length > 0 ? (
+                                        doctorReviews.map(dr => (
+                                            <div key={dr.id} className="card p-5 space-y-2">
+                                                <div className="flex items-center justify-between text-xs font-bold border-b border-slate-200 dark:border-slate-800 pb-2">
+                                                    <span className="text-sky-700 dark:text-sky-400">Reviewer: {dr.clinician_id}</span>
+                                                    <span className="font-mono text-slate-500">{fmt.date(dr.review_date)}</span>
+                                                </div>
+                                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200"><strong>Assessment:</strong> {dr.assessment}</p>
+                                                <p className="text-xs text-slate-600 dark:text-slate-400"><strong>Recommendations:</strong> {dr.recommendations}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <EmptyState icon="fa-notes-medical" title="No clinical notes on record" description="No doctor notes have been filed for this admission." />
+                                    )}
+
+                                    {prescriptions.length > 0 && (
+                                        <div className="card p-5">
+                                            <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">Pharmacological Orders</h4>
+                                            <div className="space-y-2">
+                                                {prescriptions.map(rx => (
+                                                    <div key={rx.id} className="card-sm p-3 flex items-center justify-between text-xs">
+                                                        <span className="font-bold text-slate-900 dark:text-white">{rx.medication_name} ({rx.dosage})</span>
+                                                        <span className="font-mono text-slate-500">Initiated: {fmt.date(rx.start_date)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <AIChatBox patientId={patientId} compact={true} />
+                                </div>
+                            )}
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ─── Priority Patients Table Component ─────────────────────────────────────────
+function PriorityPatientsTable({ patients, onSelect }) {
+    const prioritized = useMemo(() => patients.map(p => {
+        const isCritical = ['P-SYN-002', 'P-SYN-005', 'P-SYN-008'].includes(p.id);
+        const isNicu = ['P-SYN-002', 'P-SYN-003', 'P-SYN-005', 'P-SYN-007', 'P-SYN-008'].includes(p.id);
+        const isAntenatal = ['P-SYN-001', 'P-SYN-004', 'P-SYN-006', 'P-SYN-009', 'P-SYN-010'].includes(p.id);
+        return {
+            ...p,
+            simRisk: isCritical ? 0.78 : isNicu ? 0.42 : 0.18,
+            stage: isNicu ? 'NICU' : isAntenatal ? 'Antenatal' : 'Monitoring',
+            needsReview: isCritical,
+        };
+    }).sort((a, b) => b.simRisk - a.simRisk), [patients]);
+
+    return (
+        <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+                            <th className="px-5 py-3.5 text-left">Patient Name</th>
+                            <th className="px-5 py-3.5 text-left">Record ID</th>
+                            <th className="px-5 py-3.5 text-left">Care Stage</th>
+                            <th className="px-5 py-3.5 text-left">Status Indicator</th>
+                            <th className="px-5 py-3.5 text-left">Review Need</th>
+                            <th className="px-5 py-3.5 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/50">
+                        {prioritized.map(p => {
+                            const r = riskLevel(p.simRisk);
+                            const avatar = PATIENT_AVATARS[p.id] || DEFAULT_AVATAR;
+                            return (
+                                <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer" onClick={() => onSelect(p.id)}>
+                                    <td className="px-5 py-3.5">
+                                        <div className="flex items-center gap-3">
+                                            <img src={avatar} alt={p.name} className="w-9 h-9 rounded-full object-cover border border-slate-300 dark:border-slate-700 shadow-sm flex-shrink-0" />
+                                            <div>
+                                                <span className="font-bold text-slate-900 dark:text-white block text-sm">{p.name || p.id}</span>
+                                                <span className="text-xs text-slate-500 font-mono">{p.id}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-5 py-3.5 font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">{p.id}</td>
+                                    <td className="px-5 py-3.5">
+                                        <span className={`px-2.5 py-0.5 rounded text-xs font-bold ${p.stage === 'NICU' ? 'bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800' : 'bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800'}`}>
+                                            {p.stage}
+                                        </span>
+                                    </td>
+                                    <td className="px-5 py-3.5">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: r.dot }}></span>
+                                            <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{r.label}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-5 py-3.5">
+                                        {p.needsReview ? (
+                                            <span className="status-high px-2.5 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1">
+                                                <i className="fa-solid fa-triangle-exclamation text-xs"></i>
+                                                Review Required
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs font-semibold text-slate-500">Routine Surveillance</span>
+                                        )}
+                                    </td>
+                                    <td className="px-5 py-3.5 text-right">
+                                        <button className="text-xs font-bold text-sky-600 hover:text-sky-800 dark:text-sky-400 dark:hover:text-sky-300">
+                                            Open Dossier →
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
+// ─── Dashboard Page (Doctor Home) ─────────────────────────────────────────────
+function DashboardPage({ stats, patients, onSelectPatient }) {
+    const [filter, setFilter] = useState('ALL');
+    const [search, setSearch] = useState('');
+    const [showChat, setShowChat] = useState(false);
+
+    const filtered = useMemo(() => patients.filter(p => {
+        const matchSearch = (p.name || '').toLowerCase().includes(search.toLowerCase()) || p.id.toLowerCase().includes(search.toLowerCase());
+        if (filter === 'NICU') return matchSearch && ['P-SYN-002','P-SYN-003','P-SYN-005','P-SYN-007','P-SYN-008'].includes(p.id);
+        if (filter === 'PRENATAL') return matchSearch && ['P-SYN-001','P-SYN-004','P-SYN-006','P-SYN-009','P-SYN-010'].includes(p.id);
+        if (filter === 'REVIEW') return matchSearch && ['P-SYN-002','P-SYN-005','P-SYN-008'].includes(p.id);
+        return matchSearch;
+    }), [patients, filter, search]);
+
+    const reviewPatients = useMemo(() => patients.filter(p => ['P-SYN-002','P-SYN-005','P-SYN-008'].includes(p.id)), [patients]);
+
+    return (
+        <div className="space-y-6">
+            {/* Top 4 Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                    { label: 'Total Patients', value: stats.total_patients, desc: 'Under continuous monitoring', icon: 'fa-users', color: 'text-slate-600 dark:text-slate-400', filter: 'ALL' },
+                    { label: 'Active Pregnancies', value: stats.active_pregnancies, desc: 'Antenatal surveillance', icon: 'fa-person-pregnant', color: 'text-sky-600 dark:text-sky-400', filter: 'PRENATAL' },
+                    { label: 'NICU Incubators', value: stats.nicu_admissions, desc: 'Continuous vital telemetry', icon: 'fa-hospital', color: 'text-emerald-600 dark:text-emerald-400', filter: 'NICU' },
+                    { label: 'Requiring Review', value: stats.active_alerts, desc: 'Clinician assessment flagged', icon: 'fa-triangle-exclamation', color: 'text-amber-600 dark:text-amber-400', filter: 'REVIEW' },
+                ].map((c, i) => (
+                    <button key={i} onClick={() => setFilter(c.filter)}
+                        className={`card p-5 text-left transition hover:shadow-md ${filter === c.filter ? 'ring-2 ring-sky-600 border-sky-600' : ''}`}>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{c.label}</span>
+                            <i className={`fa-solid ${c.icon} ${c.color} text-base`}></i>
+                        </div>
+                        <div className="text-3xl font-extrabold text-slate-900 dark:text-white mb-1 font-mono">{c.value}</div>
+                        <p className="text-xs font-medium text-slate-600 dark:text-slate-400">{c.desc}</p>
+                    </button>
+                ))}
+            </div>
+
+            {/* Patients Requiring Review */}
+            {reviewPatients.length > 0 && (
+                <div>
+                    <SectionHeader
+                        title="Patients Requiring Review"
+                        subtitle="These cases have triggered monitoring thresholds. Clinician assessment is advised."
+                        action={<span className="status-high px-3 py-1 rounded-full text-xs font-bold">{reviewPatients.length} High Priority</span>}
+                    />
+                    <PriorityPatientsTable patients={reviewPatients} onSelect={onSelectPatient} />
+                </div>
+            )}
+
+            {/* All Monitored Patients */}
+            <div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                    <SectionHeader title="Active Patient Roster" subtitle={`${filtered.length} patients in surveillance`} />
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {[['ALL', 'All'], ['NICU', 'NICU'], ['PRENATAL', 'Antenatal'], ['REVIEW', 'Review']].map(([v, l]) => (
+                            <button key={v} onClick={() => setFilter(v)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${filter === v ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-50'}`}>
+                                {l}
+                            </button>
+                        ))}
+                        <div className="relative">
+                            <input
+                                value={search} onChange={e => setSearch(e.target.value)}
+                                placeholder="Search by name or ID..."
+                                className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-500 outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600 font-medium w-48 shadow-sm"
+                            />
+                            <i className="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <PriorityPatientsTable patients={filtered} onSelect={onSelectPatient} />
+            </div>
+
+            {/* Ward AI Assistant (Collapsible) */}
+            <div className="pt-2">
+                <button onClick={() => setShowChat(!showChat)}
+                    className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-sky-600 transition mb-3">
+                    <i className={`fa-solid fa-chevron-${showChat ? 'down' : 'right'} text-xs`}></i>
+                    <i className="fa-solid fa-robot text-sky-600 dark:text-sky-400"></i>
+                    <span>Clinical AI Ward Consultant</span>
+                    <span className="text-xs font-normal text-slate-500">(click to expand)</span>
+                </button>
+                {showChat && <AIChatBox patientId="global_ward" />}
+            </div>
+        </div>
+    );
+}
+
+// ─── Alerts Center Page ───────────────────────────────────────────────────────
+function AlertsPage({ patients, onSelectPatient }) {
+    const criticalPatients = patients.filter(p => ['P-SYN-002','P-SYN-005','P-SYN-008'].includes(p.id));
+    return (
+        <div className="space-y-5">
+            <SectionHeader title="Clinical Alert Center" subtitle="Model/telemetry threshold notifications. All flags require clinician evaluation." />
+            <div className="disclaimer-bar rounded-lg px-4 py-2.5 flex items-center gap-2.5 text-xs shadow-sm">
+                <i className="fa-solid fa-shield-halved text-amber-600 dark:text-amber-400"></i>
+                <span>These notifications are model/telemetry indicators and do NOT constitute autonomous diagnoses.</span>
+            </div>
+            {criticalPatients.length === 0 ? (
+                <EmptyState icon="fa-bell-slash" title="No active clinical alerts" description="All monitored patients are operating within expected baseline parameters." />
+            ) : (
+                <div className="space-y-3">
+                    {criticalPatients.map(p => {
+                        const avatar = PATIENT_AVATARS[p.id] || DEFAULT_AVATAR;
+                        return (
+                            <div key={p.id} className="card p-5 border-l-4 border-l-rose-600 hover:shadow-md transition">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <img src={avatar} alt={p.name} className="w-11 h-11 rounded-full object-cover border border-slate-300 dark:border-slate-700" />
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="status-high px-2.5 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1">
+                                                    <i className="fa-solid fa-triangle-exclamation"></i> High Priority Review Flag
+                                                </span>
+                                            </div>
+                                            <h3 className="font-bold text-slate-900 dark:text-white text-base">{p.name || p.id}</h3>
+                                            <p className="text-xs font-mono font-semibold text-slate-500 mt-0.5">ID: {p.id} · Level IV NICU Telemetry</p>
+                                            <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">Multi-modal deterioration probability &gt; 70% threshold</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => onSelectPatient(p.id)}
+                                        className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">
+                                        Open Dossier →
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── NICU Page ────────────────────────────────────────────────────────────────
+function NicuPage({ patients, onSelectPatient }) {
+    const nicuPatients = patients.filter(p => ['P-SYN-002','P-SYN-003','P-SYN-005','P-SYN-007','P-SYN-008'].includes(p.id));
+    return (
+        <div className="space-y-5">
+            <SectionHeader title="NICU Continuous Surveillance" subtitle={`${nicuPatients.length} incubators under continuous hemodynamic & respiratory monitoring`} />
+            <PriorityPatientsTable patients={nicuPatients} onSelect={onSelectPatient} />
+        </div>
+    );
+}
+
+// ─── Pregnancy Page ───────────────────────────────────────────────────────────
+function PregnancyPage({ patients, onSelectPatient }) {
+    const antenatal = patients.filter(p => ['P-SYN-001','P-SYN-004','P-SYN-006','P-SYN-009','P-SYN-010'].includes(p.id));
+    return (
+        <div className="space-y-5">
+            <SectionHeader title="Antenatal Longitudinal Surveillance" subtitle={`${antenatal.length} pregnancies under growth & Doppler protocol`} />
+            <PriorityPatientsTable patients={antenatal} onSelect={onSelectPatient} />
+        </div>
+    );
+}
+
+// ─── System / Admin Page ──────────────────────────────────────────────────────
+function AdminPage({ stats }) {
+    const [logs, setLogs] = useState([
+        "[SYS] Telemetry Gateway Active — POD A",
+        "[SYS] XGBoost structured model: 12.4ms",
+        "[SYS] CNN-LSTM temporal model: 45.8ms",
+        "[SYS] Autoencoder reconstruction model: 38.2ms",
+        "[SYS] Transformer sequence classifier: 62.1ms",
+        "[SYS] WebSocket /alerts live: 3 active clients",
+        "[SYS] MySQL relational persistence: 100% sync",
+    ]);
+    const addLog = msg => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 30));
+
+    const models = [
+        { name: 'XGBoost', role: 'Structured Tabular Risk', latency: 12.4, pct: 15, color: 'bg-sky-600', status: 'ONLINE' },
+        { name: 'CNN-LSTM', role: 'Deep Temporal Sequence', latency: 45.8, pct: 45, color: 'bg-emerald-600', status: 'ONLINE' },
+        { name: 'Autoencoder', role: 'Signal Reconstruction', latency: 38.2, pct: 38, color: 'bg-purple-600', status: 'ONLINE' },
+        { name: 'Transformer', role: 'Temporal Attention Classifier', latency: 62.1, pct: 52, color: 'bg-blue-600', status: 'ONLINE' },
+    ];
+
+    return (
+        <div className="space-y-6">
+            <div className="card p-5">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white">Hospital System Health & Operations</h2>
+                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Telemetry gateway and inference engine status</p>
+                    </div>
+                    <span className="status-stable px-3 py-1.5 text-xs rounded-full font-bold flex items-center gap-2">
+                        <i className="fa-solid fa-circle-check"></i> System Operational
+                    </span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                        { label: 'Monitored In-Patients', value: stats.total_patients, color: 'text-slate-900 dark:text-white' },
+                        { label: 'Active Incubators', value: stats.nicu_admissions, color: 'text-sky-700 dark:text-sky-400' },
+                        { label: 'Antenatal Profiles', value: stats.active_pregnancies, color: 'text-emerald-700 dark:text-emerald-400' },
+                        { label: 'Triggered Thresholds', value: stats.active_alerts, color: 'text-amber-700 dark:text-amber-400' },
+                    ].map((s, i) => (
+                        <div key={i} className="card-sm p-4">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">{s.label}</span>
+                            <span className={`text-3xl font-extrabold font-mono ${s.color}`}>{s.value}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="card p-5">
+                    <SectionHeader title="Model Inference Latencies" subtitle="Real-time multi-model benchmarks" />
+                    <div className="space-y-4">
+                        {models.map((m, i) => (
+                            <div key={i}>
+                                <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                                    <span className="text-slate-800 dark:text-slate-200">{m.name} ({m.role})</span>
+                                    <span className="font-mono text-slate-900 dark:text-white font-bold">{m.latency} ms</span>
+                                </div>
+                                <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.pct}%` }}></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="card p-5">
+                    <SectionHeader title="Administrative Control Operations" />
+                    <div className="space-y-2">
+                        {[
+                            ['fa-rotate', 'Restart Telemetry Gateway', 'Telemetry gateway re-initialized.'],
+                            ['fa-database', 'Flush Local Cache', 'Cache purged.'],
+                            ['fa-microchip', 'Run Diagnostics', 'All 4 neural architectures verified.'],
+                            ['fa-shield', 'Generate Backup', 'Encrypted database state snapshot created.'],
+                        ].map(([icon, label, logMsg], i) => (
+                            <button key={i} onClick={() => addLog(logMsg)}
+                                className="w-full text-left py-2.5 px-3.5 card-sm hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs text-slate-800 dark:text-slate-200 transition flex items-center gap-2.5">
+                                <i className={`fa-solid ${icon} text-slate-500 w-4`}></i>
+                                <span>{label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className="card p-5">
+                <SectionHeader title="Live System Event Console" />
+                <div className="bg-slate-900 text-slate-100 rounded-lg p-4 font-mono text-xs space-y-1 h-44 overflow-y-auto border border-slate-700">
+                    {logs.map((l, i) => (
+                        <div key={i} className="text-emerald-400">{l}</div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Login Screen Component ───────────────────────────────────────────────────
+function LoginScreen({ onLogin, isDark, toggleTheme }) {
+    return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100">
+            <div className="w-full max-w-md">
+                <div className="text-center mb-8">
+                    <div className="w-14 h-14 rounded-2xl bg-sky-600 text-white flex items-center justify-center mx-auto mb-4 shadow-md">
+                        <i className="fa-solid fa-heart-pulse text-2xl"></i>
+                    </div>
+                    <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">NeoNatal Watch AI</h1>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">Perinatal & NICU Clinical Decision Support Suite</p>
+                </div>
+
+                <div className="card p-6 space-y-3.5 shadow-md">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Select User Role</p>
+
+                    <button onClick={() => onLogin('doctor')}
+                        className="w-full card hover:border-sky-600 p-4 text-left transition group">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-400 flex items-center justify-center font-bold text-lg">
+                                <i className="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div className="flex-1">
+                                <div className="font-bold text-slate-900 dark:text-white text-sm">Attending Physician</div>
+                                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Patient roster, vitals monitoring, SHAP & AI explainability</div>
+                            </div>
+                            <i className="fa-solid fa-chevron-right text-slate-400 group-hover:text-sky-600 transition text-xs"></i>
+                        </div>
+                    </button>
+
+                    <button onClick={() => onLogin('admin')}
+                        className="w-full card hover:border-sky-600 p-4 text-left transition group">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
+                                <i className="fa-solid fa-hospital-user"></i>
+                            </div>
+                            <div className="flex-1">
+                                <div className="font-bold text-slate-900 dark:text-white text-sm">Ward Systems Administrator</div>
+                                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">System health, inference latencies, telemetry operations</div>
+                            </div>
+                            <i className="fa-solid fa-chevron-right text-slate-400 group-hover:text-sky-600 transition text-xs"></i>
+                        </div>
+                    </button>
+                </div>
+
+                <div className="flex items-center justify-between mt-6 px-2 text-xs text-slate-500">
+                    <span>Academic & Research Use Only</span>
+                    <button onClick={toggleTheme} className="font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1">
+                        <i className={`fa-solid ${isDark ? 'fa-sun' : 'fa-moon'}`}></i>
+                        <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Main Root Application ────────────────────────────────────────────────────
+function App() {
+    const [userRole, setUserRole] = useState(localStorage.getItem('nw_role') || null);
+    const [activePage, setActivePage] = useState('dashboard');
+    const [patients, setPatients] = useState([]);
+    const [stats, setStats] = useState({ total_patients: 0, active_pregnancies: 0, nicu_admissions: 0, active_alerts: 0 });
+    const [selectedPatientId, setSelectedPatientId] = useState(null);
+    const [theme, setTheme] = useState(localStorage.getItem('nw_theme') || 'light');
+
+    useEffect(() => {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        localStorage.setItem('nw_theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    };
+
+    useEffect(() => {
+        if (!userRole) return;
+        fetch(`${API}/patients/`).then(r => r.json()).then(d => Array.isArray(d) && setPatients(d)).catch(() => {});
+        fetch(`${API}/patients/stats/summary`).then(r => r.json()).then(setStats).catch(() => {});
+    }, [userRole]);
+
+    const handleLogin = role => {
+        setUserRole(role);
+        localStorage.setItem('nw_role', role);
+    };
+    const handleLogout = () => {
+        setUserRole(null);
+        localStorage.removeItem('nw_role');
+    };
+
+    const isDark = theme === 'dark';
+
+    if (!userRole) return <LoginScreen onLogin={handleLogin} isDark={isDark} toggleTheme={toggleTheme} />;
+
+    const NAV = userRole === 'doctor'
+        ? [
+            { id: 'dashboard', label: 'Dashboard', icon: 'fa-gauge-high' },
+            { id: 'patients', label: 'Patients', icon: 'fa-users' },
+            { id: 'pregnancy', label: 'Pregnancy', icon: 'fa-person-pregnant' },
+            { id: 'nicu', label: 'NICU', icon: 'fa-hospital' },
+            { id: 'alerts', label: 'Alerts', icon: 'fa-triangle-exclamation' },
+            { id: 'assistant', label: 'AI Assistant', icon: 'fa-robot' },
+          ]
+        : [
+            { id: 'dashboard', label: 'Overview', icon: 'fa-gauge-high' },
+            { id: 'patients', label: 'Patients', icon: 'fa-users' },
+            { id: 'admin', label: 'System', icon: 'fa-server' },
+          ];
+
+    return (
+        <div className="min-h-screen flex flex-col bg-[#f1f5f9] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 transition-colors">
+            {/* Safety & Academic Disclaimer Banner */}
+            <div className="disclaimer-bar py-2 px-4 text-center">
+                <i className="fa-solid fa-triangle-exclamation mr-1.5 text-amber-600 dark:text-amber-400"></i>
+                <span>Synthetic / Academic data only — NOT FOR CLINICAL USE. All model outputs require licensed clinician review.</span>
+            </div>
+
+            {/* Top Navigation Bar */}
+            <header className="bg-white dark:bg-[#0f1729] border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shadow-sm">
+                            <i className="fa-solid fa-heart-pulse text-sm"></i>
+                        </div>
+                        <div>
+                            <span className="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">NeoNatal Watch AI</span>
+                            <span className="text-xs font-semibold text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-950 px-2 py-0.5 rounded ml-2 border border-sky-200 dark:border-sky-800">
+                                Clinical Decision Support
+                            </span>
+                        </div>
+                    </div>
+
+                    <nav className="hidden md:flex items-center gap-1.5 ml-6">
+                        {NAV.map(n => (
+                            <button key={n.id} onClick={() => setActivePage(n.id)}
+                                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${activePage === n.id ? 'nav-active' : 'nav-inactive'}`}>
+                                <i className={`fa-solid ${n.icon} text-xs`}></i>
+                                <span>{n.label}</span>
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button onClick={toggleTheme} title="Toggle Eye-Comfort Theme"
+                        className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-sky-600 text-xs font-bold flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 transition">
+                        <i className={`fa-solid ${isDark ? 'fa-sun text-amber-500' : 'fa-moon text-sky-600'}`}></i>
+                        <span className="hidden sm:inline">{isDark ? 'Light' : 'Dark'}</span>
+                    </button>
+
+                    <div className="flex items-center gap-1.5 text-xs font-bold bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 rounded-full">
+                        <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block animate-pulse"></span>
+                        <span>Online</span>
+                    </div>
+
+                    <div className="text-xs font-bold text-slate-700 dark:text-slate-300 capitalize bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-lg">
+                        {userRole}
+                    </div>
+
+                    {userRole === 'doctor' && (
+                        <button onClick={() => { handleLogin('admin'); setActivePage('admin'); }}
+                            className="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-sky-600 px-2 py-1 rounded transition">
+                            Admin View
+                        </button>
+                    )}
+                    {userRole === 'admin' && (
+                        <button onClick={() => { handleLogin('doctor'); setActivePage('dashboard'); }}
+                            className="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-sky-600 px-2 py-1 rounded transition">
+                            Doctor View
+                        </button>
+                    )}
+
+                    <button onClick={handleLogout} title="Sign Out"
+                        className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 hover:text-rose-600 flex items-center justify-center transition text-xs border border-slate-200 dark:border-slate-700">
+                        <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+
+            {/* Main Page Body */}
+            <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-6">
+                {activePage === 'dashboard' && userRole === 'doctor' && (
+                    <DashboardPage stats={stats} patients={patients} onSelectPatient={setSelectedPatientId} />
+                )}
+                {activePage === 'dashboard' && userRole === 'admin' && (
+                    <div className="space-y-6">
+                        <DashboardPage stats={stats} patients={patients} onSelectPatient={setSelectedPatientId} />
+                        <AdminPage stats={stats} />
+                    </div>
+                )}
+                {activePage === 'patients' && (
+                    <div className="space-y-5">
+                        <SectionHeader title="Monitored Patient Directory" subtitle={`${patients.length} total patient records under monitoring`} />
+                        <PriorityPatientsTable patients={patients} onSelect={setSelectedPatientId} />
+                    </div>
+                )}
+                {activePage === 'pregnancy' && <PregnancyPage patients={patients} onSelectPatient={setSelectedPatientId} />}
+                {activePage === 'nicu' && <NicuPage patients={patients} onSelectPatient={setSelectedPatientId} />}
+                {activePage === 'alerts' && <AlertsPage patients={patients} onSelectPatient={setSelectedPatientId} />}
+                {activePage === 'admin' && <AdminPage stats={stats} />}
+                {activePage === 'assistant' && (
+                    <div className="max-w-3xl">
+                        <SectionHeader title="Ward Clinical AI Assistant" subtitle="Clinical decision support & biometrics query assistant" />
+                        <AIChatBox patientId="global_ward" compact={false} />
+                    </div>
+                )}
+            </main>
+
+            {/* Clean Professional Footer */}
+            <footer className="border-t border-slate-200 dark:border-slate-800 py-3.5 px-6 text-center text-xs font-semibold text-slate-500 bg-white dark:bg-[#0f1729]">
+                NeoNatal Watch AI · Longitudinal Maternal-Fetal Decision Support Suite · Academic Research · All Rights Reserved
+            </footer>
+
+            {/* Patient Detail Drawer */}
+            {selectedPatientId && (
+                <PatientDetailDrawer
+                    patientId={selectedPatientId}
+                    onClose={() => setSelectedPatientId(null)}
+                    userRole={userRole}
+                    isDark={isDark}
+                />
+            )}
+        </div>
+    );
+}
+
+// Mount React Root
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);

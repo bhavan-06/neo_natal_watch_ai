@@ -1,0 +1,11 @@
+id,patient_id,pregnancy_id,event_type,event_date,details,created_at
+701,P-SYN-001,101,first_trimester_screen,2025-12-10 10:30:00,Routine 1st trimester combined screening completed; low risk calculated.,2025-12-10 11:30:00
+702,P-SYN-001,101,labor_delivery,2026-07-03 08:15:00,Spontaneous vaginal delivery at 39 weeks 2 days without maternal-fetal complications.,2026-07-03 10:00:00
+703,P-SYN-002,102,growth_deviation_flag,2026-02-02 12:30:00,Automated alert: Fetal abdominal growth trajectory decoupled from 1st-trimester forecast (-26% variance).,2026-02-02 12:30:00
+704,P-SYN-002,102,labor_delivery,2026-06-05 14:20:00,Induced labor for fetal growth restriction at 37 weeks 5 days.,2026-06-05 16:00:00
+705,P-SYN-003,103,vascular_risk_detection,2025-11-01 16:00:00,Bilateral uterine artery notch detected alongside PlGF reduction.,2025-11-01 16:30:00
+706,P-SYN-003,103,preterm_cesarean,2026-04-28 09:45:00,Cesarean delivery performed at 35w6d due to abnormal umbilical artery Doppler and non-reassuring CTG.,2026-04-28 11:00:00
+707,P-SYN-004,104,mfm_multidisciplinary_review,2026-01-15 14:00:00,Maternal-fetal medicine review for chronic hypertension and diabetes optimization.,2026-01-15 15:00:00
+708,P-SYN-004,104,scheduled_cesarean,2026-07-15 08:30:00,Elective primary cesarean section at 36 weeks 4 days.,2026-07-15 10:30:00
+709,P-SYN-005,105,acute_pprom,2026-02-18 04:30:00,Preterm premature rupture of membranes at 32 weeks 0 days; betamethasone course administered.,2026-02-18 06:00:00
+710,P-SYN-005,105,preterm_precipitous_delivery,2026-02-19 11:20:00,Preterm vaginal delivery of viable infant at 32 weeks 1 day.,2026-02-19 13:00:00

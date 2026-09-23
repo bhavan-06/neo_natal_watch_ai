@@ -1,0 +1,5 @@
+id,patient_id,pregnancy_id,clinician_id,medication_name,dosage,start_date,end_date,notes,created_at
+901,P-SYN-001,101,DOC-OBGYN-01,Prenatal Multivitamin with Folic Acid,1 tablet daily,2025-10-15 00:00:00,2026-07-15 00:00:00,Routine antenatal supplementation,2025-10-15 10:30:00
+902,P-SYN-003,103,DOC-MFM-01,Aspirin (Low-Dose),150 mg once daily at bedtime,2025-11-01 00:00:00,2026-04-20 00:00:00,Preeclampsia and placental insufficiency prophylaxis following abnormal 1st trimester Doppler,2025-11-01 16:30:00
+903,P-SYN-004,104,DOC-MFM-02,Labetalol Hydrochloride,100 mg orally twice daily,2025-11-15 00:00:00,2026-07-20 00:00:00,Antihypertensive therapy for pre-existing chronic hypertension,2025-11-15 11:30:00
+904,P-SYN-004,104,DOC-MFM-02,Aspirin (Low-Dose),150 mg once daily at bedtime,2026-01-10 00:00:00,2026-07-05 00:00:00,Preeclampsia prevention in high-risk maternal comorbidities,2026-01-10 13:00:00

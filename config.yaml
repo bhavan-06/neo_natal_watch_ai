@@ -1,0 +1,237 @@
+# NeoNatal Watch AI — Project Configuration
+# ==========================================
+# This file controls all configurable parameters.
+# Loaded by config.py in the backend.
+# Edit this file to change settings without modifying code.
+
+# ──────────────────────────────────────────
+# IMPORTANT DISCLAIMER
+# ──────────────────────────────────────────
+project:
+  name: "NeoNatal Watch AI"
+  subtitle: "Real-Time NICU Infant Vital Monitoring and Deterioration Prediction"
+  version: "0.1.0-prototype"
+  type: "ACADEMIC_PROTOTYPE"
+  disclaimer: >
+    This system is an academic/research prototype for demonstration purposes only.
+    It must NOT be used for real clinical decision-making.
+    All risk scores and predictions are model outputs, not medically validated diagnoses.
+    All thresholds are demonstration thresholds only.
+
+# ──────────────────────────────────────────
+# DATA SETTINGS
+# ──────────────────────────────────────────
+data:
+  # Primary dataset to use: 'cinc2019', 'pics', 'synthetic'
+  primary_source: "synthetic"
+
+  # Paths (relative to project root)
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  synthetic_dir: "data/synthetic"
+  cinc2019_dir: "data/raw/challenge2019"
+  pics_dir: "data/raw/picsdb"
+
+  # Synthetic data settings
+  synthetic:
+    n_patients: 20
+    hours_per_patient: 24.0
+    sampling_interval_seconds: 10
+    event_probability_per_hour: 0.15
+    seed: 42
+
+# ──────────────────────────────────────────
+# PREPROCESSING SETTINGS
+# ──────────────────────────────────────────
+preprocessing:
+  # Resampling
+  target_sampling_interval_seconds: 60  # resample to 1 sample/minute for ML
+
+  # Missing value handling
+  max_gap_to_interpolate_minutes: 30    # gaps > 30 min: do not interpolate
+  forward_fill_limit: 3                 # max consecutive forward-fills
+
+  # Outlier detection (Z-score threshold)
+  outlier_z_threshold: 4.0
+
+  # Data splitting (patient-level, not row-level)
+  train_fraction: 0.70
+  val_fraction:   0.15
+  test_fraction:  0.15
+  random_seed: 42
+
+  # Vital sign physiological bounds (for outlier clamping)
+  vital_bounds:
+    heart_rate:
+      min: 60
+      max: 240
+    spo2:
+      min: 70
+      max: 100
+    respiratory_rate:
+      min: 10
+      max: 100
+    temperature:
+      min: 34.0
+      max: 42.0
+    systolic_bp:
+      min: 20
+      max: 250
+    diastolic_bp:
+      min: 10
+      max: 150
+
+# ──────────────────────────────────────────
+# FEATURE ENGINEERING SETTINGS
+# ──────────────────────────────────────────
+features:
+  # Window sizes for rolling statistics (in samples, after resampling)
+  windows:
+    - 5    # 5 minutes
+    - 15   # 15 minutes
+    - 30   # 30 minutes
+    - 60   # 60 minutes
+
+  # Which statistics to compute per window
+  rolling_stats:
+    - mean
+    - std
+    - min
+    - max
+    - slope
+
+  # Include rate-of-change features
+  include_rate_of_change: true
+
+  # Include missingness indicator features
+  include_missingness: true
+
+# ──────────────────────────────────────────
+# MODEL SETTINGS
+# ──────────────────────────────────────────
+models:
+  save_dir: "models/"
+
+  xgboost:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    use_label_encoder: false
+    eval_metric: "aucpr"
+    seed: 42
+    scale_pos_weight: 5   # handles class imbalance
+
+  cnn_lstm:
+    sequence_length: 30         # time steps per input window
+    n_features: 6               # number of vital signs
+    cnn_filters: [32, 64]
+    cnn_kernel_size: 3
+    lstm_units: 64
+    dropout: 0.3
+    batch_size: 32
+    epochs: 50
+    learning_rate: 0.001
+    seed: 42
+
+  transformer:
+    sequence_length: 30
+    n_features: 6
+    d_model: 64
+    n_heads: 4
+    ff_dim: 128
+    n_layers: 2
+    dropout: 0.1
+    batch_size: 32
+    epochs: 50
+    learning_rate: 0.001
+    seed: 42
+
+  autoencoder:
+    sequence_length: 30
+    n_features: 6
+    encoding_dims: [32, 16, 8]  # encoder compression layers
+    batch_size: 32
+    epochs: 50
+    learning_rate: 0.001
+    anomaly_threshold_percentile: 95  # reconstruction error percentile for alert
+    seed: 42
+
+# ──────────────────────────────────────────
+# RISK FUSION SETTINGS
+# ──────────────────────────────────────────
+risk_fusion:
+  # Configurable weights for the combined risk score
+  # These are NOT medically validated weights.
+  # They are demonstration defaults for software testing.
+  weights:
+    xgboost: 0.35
+    cnn_lstm: 0.30
+    autoencoder: 0.20
+    transformer: 0.15
+
+  # DEMO risk categories — NOT medically validated thresholds
+  thresholds:
+    low:
+      max: 0.29
+      label: "LOW"
+      color: "green"
+    moderate:
+      min: 0.30
+      max: 0.69
+      label: "WATCH"
+      color: "yellow"
+    high:
+      min: 0.70
+      label: "HIGH"
+      color: "red"
+
+# ──────────────────────────────────────────
+# ALERT SETTINGS (DEMO ONLY)
+# ──────────────────────────────────────────
+alerts:
+  # These are DEMO alert thresholds — NOT medically validated
+  demo_high_threshold: 0.70
+  demo_watch_threshold: 0.30
+
+  # Minimum time between alerts for the same patient (minutes)
+  cooldown_minutes: 5
+
+# ──────────────────────────────────────────
+# BACKEND SETTINGS
+# ──────────────────────────────────────────
+backend:
+  host: "0.0.0.0"
+  port: 8000
+  debug: true
+  cors_origins:
+    - "http://localhost:3000"   # React dev server
+    - "http://localhost:5173"   # Vite dev server
+
+  # Real-time simulation settings
+  simulator:
+    enabled: true
+    interval_seconds: 5         # push new data every 5 seconds
+    n_simulated_patients: 5
+
+# ──────────────────────────────────────────
+# DATABASE SETTINGS
+# ──────────────────────────────────────────
+database:
+  # Do NOT put real credentials here.
+  # Override with environment variables (see .env.example).
+  host: "localhost"
+  port: 5432
+  name: "neonatal_watch_db"
+  # username and password come from environment variables:
+  # DATABASE_USER and DATABASE_PASSWORD
+
+# ──────────────────────────────────────────
+# LOGGING
+# ──────────────────────────────────────────
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+  log_dir: "logs/"
+

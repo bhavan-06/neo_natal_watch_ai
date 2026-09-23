@@ -1,0 +1,7 @@
+id,pregnancy_id,maternal_age,bmi,map_value,chronic_hypertension,diabetes,other_conditions,recorded_at
+201,101,28.0,22.4,82.0,0,0,None (Low-risk primigravida),2025-10-15 10:00:00
+202,102,32.0,24.1,88.0,0,0,Mild asthma in childhood,2025-10-02 09:30:00
+203,103,34.0,26.8,96.0,0,0,Elevated baseline vascular resistance,2025-09-10 14:15:00
+204,104,37.0,31.5,108.0,1,1,Essential chronic hypertension and Pre-gestational Type 2 Diabetes,2025-11-15 11:00:00
+205,105,29.0,23.0,85.0,0,0,Prior elective cerclage,2025-07-28 11:30:00
+206,106,30.0,21.8,84.0,0,0,None (Active cohort),2026-05-20 10:00:00

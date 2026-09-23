@@ -1,0 +1,2638 @@
+{
+  "db_host": "localhost",
+  "db_port": "3306",
+  "db_name": "neonatal_watch_ai",
+  "db_user": "root",
+  "server_version": "8.0.46",
+  "total_tables": 23,
+  "table_stats": {
+    "alembic_version": 1,
+    "alerts": 0,
+    "chat_history": 2,
+    "clinical_events": 0,
+    "dataset_sources": 0,
+    "doctor_reviews": 0,
+    "doppler_results": 0,
+    "fetal_assessments": 0,
+    "growth_analysis": 0,
+    "import_errors": 0,
+    "import_jobs": 0,
+    "lab_results": 0,
+    "maternal_profiles": 0,
+    "model_outputs": 0,
+    "newborns": 0,
+    "nicu_admissions": 0,
+    "nicu_vitals": 0,
+    "patients": 1,
+    "predictions": 1,
+    "pregnancies": 0,
+    "prescriptions": 0,
+    "ultrasound_records": 0,
+    "vital_signs": 60
+  },
+  "matching_tables": [
+    "alerts",
+    "chat_history",
+    "clinical_events",
+    "dataset_sources",
+    "doctor_reviews",
+    "doppler_results",
+    "fetal_assessments",
+    "growth_analysis",
+    "import_errors",
+    "import_jobs",
+    "lab_results",
+    "maternal_profiles",
+    "model_outputs",
+    "newborns",
+    "nicu_admissions",
+    "nicu_vitals",
+    "patients",
+    "predictions",
+    "pregnancies",
+    "prescriptions",
+    "ultrasound_records",
+    "vital_signs"
+  ],
+  "missing_in_db": [],
+  "extra_in_db": [],
+  "column_mismatches": [],
+  "query_results": {
+    "Patient": {
+      "count": 1,
+      "status": "OK"
+    },
+    "Pregnancy": {
+      "count": 0,
+      "status": "OK"
+    },
+    "MaternalProfile": {
+      "count": 0,
+      "status": "OK"
+    },
+    "FetalAssessment": {
+      "count": 0,
+      "status": "OK"
+    },
+    "UltrasoundRecord": {
+      "count": 0,
+      "status": "OK"
+    },
+    "LabResult": {
+      "count": 0,
+      "status": "OK"
+    },
+    "DopplerResult": {
+      "count": 0,
+      "status": "OK"
+    },
+    "Prediction": {
+      "count": 1,
+      "status": "OK"
+    },
+    "GrowthAnalysis": {
+      "count": 0,
+      "status": "OK"
+    },
+    "Newborn": {
+      "count": 0,
+      "status": "OK"
+    },
+    "NicuAdmission": {
+      "count": 0,
+      "status": "OK"
+    },
+    "NicuVital": {
+      "count": 0,
+      "status": "OK"
+    },
+    "VitalSign": {
+      "count": 60,
+      "status": "OK"
+    },
+    "ModelOutput": {
+      "count": 0,
+      "status": "OK"
+    },
+    "ClinicalEvent": {
+      "count": 0,
+      "status": "OK"
+    },
+    "DoctorReview": {
+      "count": 0,
+      "status": "OK"
+    },
+    "Prescription": {
+      "count": 0,
+      "status": "OK"
+    },
+    "Alert": {
+      "count": 0,
+      "status": "OK"
+    },
+    "ChatHistory": {
+      "count": 2,
+      "status": "OK"
+    },
+    "DatasetSource": {
+      "count": 0,
+      "status": "OK"
+    },
+    "ImportJob": {
+      "count": 0,
+      "status": "OK"
+    },
+    "ImportErrorLog": {
+      "count": 0,
+      "status": "OK"
+    }
+  },
+  "detailed_table_info": {
+    "alerts": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "newborn_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "nicu_admission_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "alert_type",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "severity",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "risk_score",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "triggering_factors",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "model_version",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "acknowledged_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "acknowledged_by",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "alerts_ibfk_1",
+          "constrained_columns": [
+            "newborn_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "newborns",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "alerts_ibfk_2",
+          "constrained_columns": [
+            "nicu_admission_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "nicu_admissions",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "alerts_ibfk_3",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_alerts_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "newborn_id",
+          "column_names": [
+            "newborn_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "nicu_admission_id",
+          "column_names": [
+            "nicu_admission_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "chat_history": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "newborn_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "user_role",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "question",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "response",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "model_used",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "chat_history_ibfk_1",
+          "constrained_columns": [
+            "newborn_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "newborns",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "chat_history_ibfk_2",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "chat_history_ibfk_3",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_chat_history_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "newborn_id",
+          "column_names": [
+            "newborn_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "clinical_events": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "event_type",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "event_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "details",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "clinical_events_ibfk_1",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "clinical_events_ibfk_2",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_clinical_events_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "dataset_sources": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "dataset_name",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "source_url",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "license",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "data_type",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "description",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "imported_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "notes",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "ix_dataset_sources_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "doctor_reviews": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "clinician_id",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "review_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "findings",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "assessment",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "recommendations",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "notes",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "doctor_reviews_ibfk_1",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "doctor_reviews_ibfk_2",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_doctor_reviews_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "doppler_results": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "assessment_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "gestational_age",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "uterine_artery_pi",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "uterine_artery_status",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "umbilical_artery_status",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "other_values",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "test_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "recorded_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "doppler_results_ibfk_1",
+          "constrained_columns": [
+            "assessment_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "fetal_assessments",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "doppler_results_ibfk_2",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "assessment_id",
+          "column_names": [
+            "assessment_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_doppler_results_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_doppler_results_pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "fetal_assessments": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "gestational_age_weeks",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "trimester",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "crl",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "nt",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "nasal_bone",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "efw",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "efw_percentile",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "growth_measurements",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "assessment_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "recorded_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "fetal_assessments_ibfk_1",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_fetal_assessments_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_fetal_assessments_pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "growth_analysis": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "predicted_efw_percentile",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "actual_efw_percentile",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "growth_variance",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "evaluation_status",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "contributing_patterns",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "model_version",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "generated_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "growth_analysis_ibfk_1",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_growth_analysis_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_growth_analysis_pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "import_errors": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "job_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "row_data",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "error_message",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "import_errors_ibfk_1",
+          "constrained_columns": [
+            "job_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "import_jobs",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_import_errors_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "job_id",
+          "column_names": [
+            "job_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "import_jobs": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "dataset_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "file_name",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "rows_detected",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "rows_imported",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "rows_rejected",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "started_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "completed_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "import_jobs_ibfk_1",
+          "constrained_columns": [
+            "dataset_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "dataset_sources",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "dataset_id",
+          "column_names": [
+            "dataset_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_import_jobs_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "lab_results": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "assessment_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "papp_a",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "plgf",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "free_beta_hcg",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "test_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "gestational_age",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "recorded_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "lab_results_ibfk_1",
+          "constrained_columns": [
+            "assessment_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "fetal_assessments",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "lab_results_ibfk_2",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "assessment_id",
+          "column_names": [
+            "assessment_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_lab_results_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_lab_results_pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "maternal_profiles": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "maternal_age",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "bmi",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "map_value",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "chronic_hypertension",
+          "type": "TINYINT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "diabetes",
+          "type": "TINYINT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "other_conditions",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "recorded_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "maternal_profiles_ibfk_1",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_maternal_profiles_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_maternal_profiles_pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "model_outputs": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "newborn_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "nicu_admission_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "model_name",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "model_version",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "input_reference",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "output_type",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "output_value",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "confidence",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "explanation_reference",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "model_outputs_ibfk_1",
+          "constrained_columns": [
+            "newborn_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "newborns",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "model_outputs_ibfk_2",
+          "constrained_columns": [
+            "nicu_admission_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "nicu_admissions",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "model_outputs_ibfk_3",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "model_outputs_ibfk_4",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_model_outputs_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "newborn_id",
+          "column_names": [
+            "newborn_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "nicu_admission_id",
+          "column_names": [
+            "nicu_admission_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "newborns": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "newborn_code",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "birth_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "gestational_age_at_birth",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "birth_weight",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "birth_length",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "birth_status",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "newborns_ibfk_1",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_newborns_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_newborns_pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "nicu_admissions": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "newborn_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "admission_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "discharge_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "admission_reason",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "nicu_admissions_ibfk_1",
+          "constrained_columns": [
+            "newborn_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "newborns",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_nicu_admissions_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_nicu_admissions_newborn_id",
+          "column_names": [
+            "newborn_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "nicu_vitals": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "nicu_admission_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "timestamp",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "heart_rate",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "spo2",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "respiratory_rate",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "temperature",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "nicu_vitals_ibfk_1",
+          "constrained_columns": [
+            "nicu_admission_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "nicu_admissions",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_nicu_vitals_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_nicu_vitals_nicu_admission_id",
+          "column_names": [
+            "nicu_admission_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_nicu_vitals_timestamp",
+          "column_names": [
+            "timestamp"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "patients": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_code",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "date_of_birth",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "contact_info",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "ix_patients_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_patients_patient_code",
+          "column_names": [
+            "patient_code"
+          ],
+          "unique": true,
+          "type": "UNIQUE"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "ix_patients_patient_code",
+          "column_names": [
+            "patient_code"
+          ],
+          "duplicates_index": "ix_patients_patient_code"
+        }
+      ]
+    },
+    "predictions": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "assessment_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "prediction_type",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "target",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "predicted_value",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "confidence",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "model_name",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "model_version",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "prediction_horizon",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "timestamp",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "risk_score",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "risk_level",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "xgb_score",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "cnn_lstm_score",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "ae_score",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "transformer_score",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "predictions_ibfk_1",
+          "constrained_columns": [
+            "assessment_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "fetal_assessments",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "predictions_ibfk_2",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "predictions_ibfk_3",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "assessment_id",
+          "column_names": [
+            "assessment_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_predictions_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_predictions_pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_predictions_timestamp",
+          "column_names": [
+            "timestamp"
+          ],
+          "unique": false
+        },
+        {
+          "name": "patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "pregnancies": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_code",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_status",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "conception_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "estimated_due_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_start",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "pregnancies_ibfk_1",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_pregnancies_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_pregnancies_patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "prescriptions": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "clinician_id",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "medication_name",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "dosage",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "start_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "end_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "notes",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "prescriptions_ibfk_1",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "prescriptions_ibfk_2",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_prescriptions_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "ultrasound_records": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "pregnancy_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "assessment_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "ultrasound_date",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "gestational_age",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "image_reference",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "findings",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "source_dataset",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "metadata_json",
+          "type": "TEXT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "ultrasound_records_ibfk_1",
+          "constrained_columns": [
+            "assessment_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "fetal_assessments",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        },
+        {
+          "name": "ultrasound_records_ibfk_2",
+          "constrained_columns": [
+            "pregnancy_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "pregnancies",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "assessment_id",
+          "column_names": [
+            "assessment_id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_ultrasound_records_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_ultrasound_records_pregnancy_id",
+          "column_names": [
+            "pregnancy_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    },
+    "vital_signs": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "None"
+        },
+        {
+          "name": "patient_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "timestamp",
+          "type": "DATETIME",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "heart_rate",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "spo2",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "respiratory_rate",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "temperature",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "systolic_bp",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        },
+        {
+          "name": "diastolic_bp",
+          "type": "FLOAT",
+          "nullable": true,
+          "default": "None"
+        }
+      ],
+      "primary_key": {
+        "constrained_columns": [
+          "id"
+        ],
+        "name": null
+      },
+      "foreign_keys": [
+        {
+          "name": "vital_signs_ibfk_1",
+          "constrained_columns": [
+            "patient_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "patients",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {}
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_vital_signs_id",
+          "column_names": [
+            "id"
+          ],
+          "unique": false
+        },
+        {
+          "name": "ix_vital_signs_timestamp",
+          "column_names": [
+            "timestamp"
+          ],
+          "unique": false
+        },
+        {
+          "name": "patient_id",
+          "column_names": [
+            "patient_id"
+          ],
+          "unique": false
+        }
+      ],
+      "unique_constraints": []
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "description": "SYNTHETIC DATA \u2014 NOT FOR CLINICAL USE",
+  "generated_at": "2026-09-21T12:31:30.924509",
+  "n_patients": 20,
+  "hours_per_patient": 24.0,
+  "sampling_interval_seconds": 10,
+  "event_probability_per_hour": 0.15,
+  "seed": 42,
+  "total_records": 172800,
+  "event_rate_percent": 0.29,
+  "columns": [
+    "timestamp",
+    "patient_id",
+    "heart_rate",
+    "spo2",
+    "respiratory_rate",
+    "temperature",
+    "systolic_bp",
+    "diastolic_bp",
+    "incubator_temperature",
+    "deterioration_label",
+    "clinical_event",
+    "data_source",
+    "data_warning"
+  ],
+  "event_types": [
+    "bradycardia_apnea",
+    "hypoxia",
+    "tachycardia",
+    "temperature_instability"
+  ],
+  "vital_sign_ranges_note": "Ranges inspired by neonatal physiology literature. NOT clinically validated. For software demonstration only."
+}

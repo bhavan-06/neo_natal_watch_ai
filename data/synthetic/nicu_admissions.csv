@@ -1,0 +1,5 @@
+id,newborn_id,admission_date,discharge_date,admission_reason,status,created_at,updated_at
+2001,1002,2026-06-05 15:30:00,2026-06-08 11:00:00,"Low birth weight (2450g), mild hypothermia and feeding observation.",discharged,2026-06-05 16:00:00,2026-06-08 11:30:00
+2002,1003,2026-04-28 10:45:00,2026-05-04 14:00:00,"Late preterm 35.8w, birth weight 2080g, transient tachypnea of the newborn.",discharged,2026-04-28 11:15:00,2026-05-04 14:30:00
+2003,1004,2026-07-15 09:45:00,2026-07-18 10:00:00,"Maternal gestational diabetes protocol, neonatal hypoglycemia surveillance.",discharged,2026-07-15 10:15:00,2026-07-18 10:30:00
+2004,1005,2026-02-19 12:15:00,2026-03-25 15:00:00,"Very preterm infant 32.1w, 1620g, Respiratory Distress Syndrome requiring CPAP and surfactant.",discharged,2026-02-19 13:00:00,2026-03-25 15:30:00

@@ -1,0 +1,65 @@
+{
+  "input_rows": 172800,
+  "input_patients": 20,
+  "outlier_report": {
+    "heart_rate": {
+      "n_total": 172800,
+      "phys_clamped": 0,
+      "z_flagged": 272,
+      "pct_clamped": 0.0
+    },
+    "spo2": {
+      "n_total": 172800,
+      "phys_clamped": 0,
+      "z_flagged": 279,
+      "pct_clamped": 0.0
+    },
+    "respiratory_rate": {
+      "n_total": 172800,
+      "phys_clamped": 0,
+      "z_flagged": 196,
+      "pct_clamped": 0.0
+    },
+    "temperature": {
+      "n_total": 172800,
+      "phys_clamped": 0,
+      "z_flagged": 188,
+      "pct_clamped": 0.0
+    },
+    "systolic_bp": {
+      "n_total": 172800,
+      "phys_clamped": 0,
+      "z_flagged": 105,
+      "pct_clamped": 0.0
+    },
+    "diastolic_bp": {
+      "n_total": 172800,
+      "phys_clamped": 0,
+      "z_flagged": 111,
+      "pct_clamped": 0.0
+    }
+  },
+  "nan_after_fill": 0,
+  "rows_after_resample": 28800,
+  "train_rows": 20160,
+  "val_rows": 2880,
+  "test_rows": 5760,
+  "train_patients": 14,
+  "val_patients": 2,
+  "test_patients": 4,
+  "X_train_shape": [
+    19740,
+    30,
+    6
+  ],
+  "X_val_shape": [
+    2820,
+    30,
+    6
+  ],
+  "X_test_shape": [
+    5640,
+    30,
+    6
+  ]
+}

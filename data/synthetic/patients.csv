@@ -1,0 +1,7 @@
+id,patient_code,name,date_of_birth,contact_info,created_at,updated_at
+P-SYN-001,SYN-PAT-001,Sarah Miller (Demo),1997-04-12 00:00:00,demo-contact-001@synthetic.local,2025-09-01 09:00:00,2026-07-15 10:00:00
+P-SYN-002,SYN-PAT-002,Elena Rostova (Demo),1993-08-23 00:00:00,demo-contact-002@synthetic.local,2025-08-15 08:30:00,2026-06-30 11:00:00
+P-SYN-003,SYN-PAT-003,Amina Patel (Demo),1991-11-05 00:00:00,demo-contact-003@synthetic.local,2025-07-20 14:00:00,2026-06-05 09:15:00
+P-SYN-004,SYN-PAT-004,Maria Garcia (Demo),1988-02-17 00:00:00,demo-contact-004@synthetic.local,2025-10-01 10:45:00,2026-08-15 16:30:00
+P-SYN-005,SYN-PAT-005,Chloe Dupont (Demo),1996-06-30 00:00:00,demo-contact-005@synthetic.local,2025-06-15 11:00:00,2026-04-30 14:20:00
+P-SYN-006,SYN-PAT-006,Grace Tan (Demo),1995-10-14 00:00:00,demo-contact-006@synthetic.local,2026-04-15 09:30:00,2026-09-20 10:00:00

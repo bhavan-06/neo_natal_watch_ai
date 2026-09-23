@@ -1,0 +1,13 @@
+id,pregnancy_id,assessment_id,gestational_age,uterine_artery_pi,uterine_artery_status,umbilical_artery_status,other_values,test_date,source,recorded_at
+601,101,301,12.2,1.12,normal,not_applicable_t1,"{""mean_pi"": 1.12, ""notch"": false}",2025-12-10 10:45:00,SYNTHETIC_DEMO,2025-12-10 11:00:00
+602,101,302,20.5,0.88,normal,normal_flow,"{""umbilical_pi"": 1.02, ""ri"": 0.65}",2026-02-06 14:15:00,SYNTHETIC_DEMO,2026-02-06 14:30:00
+603,102,303,12.0,1.45,normal,not_applicable_t1,"{""mean_pi"": 1.45, ""notch"": false}",2025-11-24 09:45:00,SYNTHETIC_DEMO,2025-11-24 10:00:00
+604,102,304,22.0,1.18,mildly_elevated,normal_positive_end_diastolic,"{""umbilical_pi"": 1.25, ""ri"": 0.72}",2026-02-02 11:15:00,SYNTHETIC_DEMO,2026-02-02 11:30:00
+605,103,305,12.4,2.25,high_resistance_bilateral_notches,not_applicable_t1,"{""mean_pi"": 2.25, ""bilateral_notch"": true}",2025-11-01 15:15:00,SYNTHETIC_DEMO,2025-11-01 15:30:00
+606,103,306,21.0,1.82,persistently_high_resistance,reduced_end_diastolic_velocity,"{""umbilical_pi"": 1.48, ""ri"": 0.81}",2026-01-05 10:45:00,SYNTHETIC_DEMO,2026-01-05 11:00:00
+607,104,307,11.8,1.95,elevated_resistance,not_applicable_t1,"{""mean_pi"": 1.95, ""unilateral_notch"": true}",2026-01-10 11:30:00,SYNTHETIC_DEMO,2026-01-10 11:45:00
+608,104,308,20.0,1.55,borderline_high,positive_diastolic_flow,"{""umbilical_pi"": 1.30, ""ri"": 0.74}",2026-03-10 14:15:00,SYNTHETIC_DEMO,2026-03-10 14:30:00
+609,105,309,12.1,1.15,normal,not_applicable_t1,"{""mean_pi"": 1.15, ""notch"": false}",2025-09-18 10:15:00,SYNTHETIC_DEMO,2025-09-18 10:30:00
+610,105,310,22.0,0.92,normal,normal_flow,"{""umbilical_pi"": 1.05, ""ri"": 0.66}",2025-11-26 14:00:00,SYNTHETIC_DEMO,2025-11-26 14:15:00
+611,106,311,12.3,1.08,normal,not_applicable_t1,"{""mean_pi"": 1.08, ""notch"": false}",2026-07-10 09:45:00,SYNTHETIC_DEMO,2026-07-10 10:00:00
+612,106,312,20.2,0.85,normal,normal_flow,"{""umbilical_pi"": 0.98, ""ri"": 0.63}",2026-09-04 11:15:00,SYNTHETIC_DEMO,2026-09-04 11:30:00
