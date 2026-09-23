@@ -220,3 +220,4 @@ When the FastAPI server starts, `lifespan(app)` loads all models into memory onc
 
 > **Synthetic / Academic Demo Data — NOT FOR CLINICAL USE**  
 > All records, predictions, and vitals trajectories in this application are synthetic simulations generated for software engineering demonstration and academic research. Model outputs must be evaluated by licensed medical professionals and are not approved for clinical decision-making.
+
