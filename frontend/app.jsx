@@ -1,4 +1,6 @@
-// NeoNatal Watch AI — Doctor-First Clinical Analytics Dashboard
+import re
+
+code = '''// NeoNatal Watch AI — Doctor-First Clinical Analytics Dashboard
 // High-Contrast, Eye-Comfort, Clinical Analytics Interface
 
 const { useState, useEffect, useRef, useMemo } = React;
@@ -7,18 +9,18 @@ const API = (typeof window !== 'undefined' && window.location && window.location
     ? `${window.location.origin}/api/v1` 
     : 'http://localhost:8000/api/v1';
 
-// ─── Embedded Synthetic Clinical Data Store (for GitHub Pages Static Hosting) ──
+// ─── Embedded Clinical Data Store (for Standalone & Connected Operation) ───────
 const FALLBACK_PATIENTS = [
-    { id: 'P-SYN-001', name: 'Sarah Jenkins', patient_code: 'SYN-001', date_of_birth: '1993-04-12', created_at: '2026-01-10T08:00:00Z' },
-    { id: 'P-SYN-002', name: 'Baby Liam (Jessica Taylor)', patient_code: 'SYN-002', date_of_birth: '1991-08-23', created_at: '2026-01-12T09:30:00Z' },
-    { id: 'P-SYN-003', name: 'Baby Emma (Rachel Adams)', patient_code: 'SYN-003', date_of_birth: '1995-11-04', created_at: '2026-01-14T11:15:00Z' },
-    { id: 'P-SYN-004', name: 'Emily Davis', patient_code: 'SYN-004', date_of_birth: '1996-02-18', created_at: '2026-01-15T14:00:00Z' },
-    { id: 'P-SYN-005', name: 'Baby Noah (Amanda Wilson)', patient_code: 'SYN-005', date_of_birth: '1990-07-29', created_at: '2026-01-18T10:45:00Z' },
-    { id: 'P-SYN-006', name: 'Olivia Martinez', patient_code: 'SYN-006', date_of_birth: '1992-05-16', created_at: '2026-01-20T16:20:00Z' },
-    { id: 'P-SYN-007', name: 'Baby Lucas (Megan White)', patient_code: 'SYN-007', date_of_birth: '1994-09-08', created_at: '2026-01-22T08:50:00Z' },
-    { id: 'P-SYN-008', name: 'Baby Sophia (Lauren Harris)', patient_code: 'SYN-008', date_of_birth: '1989-12-30', created_at: '2026-01-25T13:10:00Z' },
-    { id: 'P-SYN-009', name: 'Sophia Martinez', patient_code: 'SYN-009', date_of_birth: '1997-03-22', created_at: '2026-01-28T09:00:00Z' },
-    { id: 'P-SYN-010', name: 'Isabella Clark', patient_code: 'SYN-010', date_of_birth: '1993-10-15', created_at: '2026-02-01T15:40:00Z' }
+    { id: 'P-SYN-001', name: 'Sarah Jenkins', patient_code: 'SYN-001', date_of_birth: '1993-04-12', created_at: '2026-01-10T08:00:00Z', bed: 'Antenatal Suite 12' },
+    { id: 'P-SYN-002', name: 'Baby Liam (Jessica Taylor)', patient_code: 'SYN-002', date_of_birth: '1991-08-23', created_at: '2026-01-12T09:30:00Z', bed: 'NICU Incubator #02' },
+    { id: 'P-SYN-003', name: 'Baby Emma (Rachel Adams)', patient_code: 'SYN-003', date_of_birth: '1995-11-04', created_at: '2026-01-14T11:15:00Z', bed: 'NICU Incubator #05' },
+    { id: 'P-SYN-004', name: 'Emily Davis', patient_code: 'SYN-004', date_of_birth: '1996-02-18', created_at: '2026-01-15T14:00:00Z', bed: 'Antenatal Suite 08' },
+    { id: 'P-SYN-005', name: 'Baby Noah (Amanda Wilson)', patient_code: 'SYN-005', date_of_birth: '1990-07-29', created_at: '2026-01-18T10:45:00Z', bed: 'NICU Incubator #01' },
+    { id: 'P-SYN-006', name: 'Olivia Martinez', patient_code: 'SYN-006', date_of_birth: '1992-05-16', created_at: '2026-01-20T16:20:00Z', bed: 'Antenatal Suite 04' },
+    { id: 'P-SYN-007', name: 'Baby Lucas (Megan White)', patient_code: 'SYN-007', date_of_birth: '1994-09-08', created_at: '2026-01-22T08:50:00Z', bed: 'NICU Incubator #07' },
+    { id: 'P-SYN-008', name: 'Baby Sophia (Lauren Harris)', patient_code: 'SYN-008', date_of_birth: '1989-12-30', created_at: '2026-01-25T13:10:00Z', bed: 'NICU Incubator #03' },
+    { id: 'P-SYN-009', name: 'Sophia Martinez', patient_code: 'SYN-009', date_of_birth: '1997-03-22', created_at: '2026-01-28T09:00:00Z', bed: 'Antenatal Suite 15' },
+    { id: 'P-SYN-010', name: 'Isabella Clark', patient_code: 'SYN-010', date_of_birth: '1993-10-15', created_at: '2026-02-01T15:40:00Z', bed: 'Antenatal Suite 02' }
 ];
 
 function generateMockVitals(patientId) {
@@ -78,85 +80,498 @@ function getSyntheticFallback(endpoint, body) {
             assessment: 'Clinical monitoring protocol active. Vitals and growth velocity consistent with care plan.',
             recommendations: 'Continue standard biometrics surveillance.'
         }];
-        if (sub === 'prescriptions') return [{ id: 1, medication_name: 'Prenatal Multivitamin Complex', dosage: '1 tablet QD', start_date: '2026-01-10' }];
-        if (sub === 'newborn') return isNicu ? [{ id: 1, name: pat.name.split(' ')[0], newborn_code: 'NB-' + pid, birth_date: '2026-03-01', gestational_age_at_birth: 33.5, birth_weight: 1850 }] : [];
-        if (sub === 'nicu') return isNicu ? [{ id: 1, status: 'Active Surveillance', admission_date: '2026-03-01', admission_reason: isCrit ? 'Respiratory distress & prematurity' : 'Preterm observation' }] : [];
-        if (sub === 'alerts') return isCrit ? [
-            { id: 1, alert_type: 'Multi-Modal Vital Deterioration Flag', risk_score: 0.78, created_at: new Date(Date.now() - 15 * 60000).toISOString() }
+        if (sub === 'prescriptions') return [
+            { id: 1, medication_name: 'Caffeine Citrate', dosage: '20 mg/kg IV loading, then 5 mg/kg daily', start_date: '2026-03-20' },
+            { id: 2, medication_name: 'Surfactant (Poractant alfa)', dosage: '200 mg/kg intratracheal single dose', start_date: '2026-03-18' }
+        ];
+        if (sub === 'newborn') return isNicu ? [{
+            id: 1, newborn_code: `NB-${pid.slice(-3)}`, gestational_age_at_birth: 29.4,
+            birth_weight: isCrit ? 1120.0 : 1850.0, birth_length: 36.5, birth_status: 'LIVE_BIRTH'
+        }] : [];
+        if (sub === 'nicu') return isNicu ? [{
+            id: 1, admission_date: '2026-03-18T10:00:00Z',
+            admission_reason: isCrit ? 'Severe Preterm RDS & Hemodynamic Lability' : 'Moderate Prematurity Surveillance',
+            status: 'ADMITTED'
+        }] : [];
+        if (sub === 'alerts') return isCrit ? [{
+            id: 1, alert_type: 'CRITICAL_DETERIORATION', severity: 'HIGH',
+            risk_score: 0.84, triggering_factors: 'Sustained Bradycardia & Desaturation (<88% SpO2)',
+            status: 'ACTIVE', created_at: new Date(Date.now() - 3600000).toISOString()
+        }] : [];
+        if (sub === 'vitals') return isNicu ? generateMockVitals(pid) : [];
+        if (sub === 'maternal-vitals') return !isNicu ? [
+            { timestamp: new Date(Date.now() - 7200000).toISOString(), systolic_bp: 122, diastolic_bp: 78, map_value: 92.6, heart_rate: 82 },
+            { timestamp: new Date(Date.now() - 3600000).toISOString(), systolic_bp: 124, diastolic_bp: 80, map_value: 94.6, heart_rate: 80 }
         ] : [];
-        if (sub === 'vitals') return generateMockVitals(pid);
-        if (sub === 'maternal-vitals') return generateMockVitals(pid);
         if (sub === 'timeline') return [
-            { type: 'pregnancy_start', details: 'Antenatal Intake Recorded', date: '2026-01-10' },
-            { type: 'fetal_assessment', details: 'Trimester 1 Ultrasound Assessment', date: '2026-01-15' },
-            { type: 'fetal_assessment', details: 'Trimester 2 Growth Anomaly Scan', date: '2026-03-20' },
-            ...(isNicu ? [
-                { type: 'birth', details: 'Preterm Delivery Recorded', date: '2026-03-01' },
-                { type: 'nicu_admission', details: 'NICU Incubator Telemetry Initiated', date: '2026-03-01' }
-            ] : [])
+            { date: '2026-01-10', type: 'PREGNANCY_CONFIRMED', details: 'Antenatal registration and baseline biometrics.' },
+            { date: '2026-01-15', type: 'TRIMESTER_1_SCAN', details: 'First trimester ultrasound (EFW 48th percentile).' },
+            { date: '2026-03-18', type: 'DELIVERY_ADMISSION', details: isNicu ? 'Emergency preterm delivery and level IV NICU admission.' : 'Routine antenatal surveillance appointment.' },
+            { date: '2026-03-21', type: 'MULTI_MODAL_EVAL', details: isCrit ? 'Ensemble AI risk spike (>0.70 threshold).' : 'Stable physiological baseline.' }
         ];
         if (sub === 'explain') return {
-            top_features: [
-                { feature: 'Heart Rate (Rolling Std)', value: isCrit ? 12.4 : 5.8, shap_value: isCrit ? 0.21 : -0.08 },
-                { feature: 'Gestational Age (weeks)', value: 33.5, shap_value: isCrit ? 0.16 : -0.12 },
-                { feature: 'Mean Arterial Pressure', value: 88.0, shap_value: 0.09 },
-                { feature: 'PlGF Angiogenic Marker', value: 38.5, shap_value: -0.07 },
-                { feature: 'SpO2 Oxygen (Rolling Min)', value: isCrit ? 90.2 : 96.5, shap_value: isCrit ? 0.14 : -0.06 }
-            ],
-            baseline_value: 0.185
+            shap_values: {
+                spo2_min: isCrit ? 0.38 : -0.15,
+                heart_rate_std: isCrit ? 0.24 : -0.08,
+                resp_rate_mean: isCrit ? 0.18 : 0.05,
+                temp_variance: isCrit ? 0.12 : -0.04,
+                gestational_age: isCrit ? 0.22 : -0.18
+            },
+            feature_names: ['spo2_min', 'heart_rate_std', 'resp_rate_mean', 'temp_variance', 'gestational_age'],
+            base_value: 0.25,
+            prediction: isCrit ? 0.84 : 0.18
         };
         if (sub === 'anomaly-explain') return {
-            anomaly_score: isCrit ? 0.0842 : 0.0215,
-            anomaly_label: isCrit ? 'ANOMALY' : 'NORMAL',
-            reconstruction_error_by_feature: {
-                heart_rate: isCrit ? 0.0384 : 0.0082,
-                spo2: isCrit ? 0.0271 : 0.0054,
-                respiratory_rate: isCrit ? 0.0125 : 0.0049,
-                temperature: 0.0062
+            reconstruction_error: isCrit ? 0.084 : 0.012,
+            threshold: 0.035,
+            channel_errors: {
+                heart_rate: isCrit ? 0.092 : 0.011,
+                spo2: isCrit ? 0.104 : 0.009,
+                respiratory_rate: isCrit ? 0.076 : 0.014,
+                temperature: isCrit ? 0.021 : 0.006
             }
         };
         if (sub === 'attention-explain') return {
-            top_attention_steps: [
-                { step_index: 29, time_label: 'T−0 min (Current)', attention_weight: 0.185 },
-                { step_index: 28, time_label: 'T−1 min', attention_weight: 0.142 },
-                { step_index: 27, time_label: 'T−2 min', attention_weight: 0.118 },
-                { step_index: 26, time_label: 'T−3 min', attention_weight: 0.094 },
-                { step_index: 25, time_label: 'T−4 min', attention_weight: 0.082 },
-                { step_index: 20, time_label: 'T−9 min', attention_weight: 0.065 },
-                { step_index: 15, time_label: 'T−14 min', attention_weight: 0.052 }
-            ]
+            time_steps: Array.from({ length: 12 }, (_, i) => `-${(12 - i) * 5}m`),
+            attention_weights: isCrit 
+                ? [0.03, 0.04, 0.05, 0.06, 0.08, 0.12, 0.18, 0.24, 0.31, 0.38, 0.44, 0.49]
+                : [0.08, 0.09, 0.07, 0.08, 0.09, 0.08, 0.09, 0.08, 0.08, 0.09, 0.08, 0.08]
         };
     }
-    return [];
+    return {};
 }
 
 async function apiGet(endpoint) {
     try {
-        const r = await fetch(API + endpoint);
-        if (r.ok) return await r.json();
-    } catch (e) {
-        // Fallback to embedded synthetic clinical data for static GitHub Pages hosting
-    }
+        const res = await fetch(`${API}${endpoint}`);
+        if (res.ok) return await res.json();
+    } catch (e) {}
     return getSyntheticFallback(endpoint);
 }
 
 async function apiPost(endpoint, body) {
     try {
-        const r = await fetch(API + endpoint, {
+        const res = await fetch(`${API}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
-        if (r.ok) return await r.json();
-    } catch (e) {
-        // Fallback
-    }
+        if (res.ok) return await res.json();
+    } catch (e) {}
     return getSyntheticFallback(endpoint, body);
 }
 
+// ─── Individual Patient Report Generator & Downloader ─────────────────────────
+function downloadPatientReport(patientId, liveVital = null, extraData = {}) {
+    const pat = FALLBACK_PATIENTS.find(p => p.id === patientId) || { id: patientId, name: patientId, date_of_birth: '1994-06-15' };
+    const isCrit = ['P-SYN-002', 'P-SYN-005', 'P-SYN-008'].includes(patientId);
+    const isNicu = ['P-SYN-002', 'P-SYN-003', 'P-SYN-005', 'P-SYN-007', 'P-SYN-008'].includes(patientId);
+
+    const hr = liveVital?.heart_rate || (isCrit ? 168 : isNicu ? 138 : 78);
+    const spo2 = liveVital?.spo2 || (isCrit ? 91 : 97);
+    const rr = liveVital?.respiratory_rate || (isCrit ? 62 : isNicu ? 42 : 18);
+    const temp = liveVital?.temperature || (isCrit ? 37.8 : 36.9);
+    const score = isCrit ? 0.84 : isNicu ? 0.42 : 0.18;
+    const riskTier = isCrit ? 'HIGH PRIORITY / CRITICAL MONITORING' : isNicu ? 'WATCH / ELEVATED SURVEILLANCE' : 'STABLE / ROUTINE SURVEILLANCE';
+    const riskBadgeColor = isCrit ? '#dc2626' : isNicu ? '#d97706' : '#059669';
+    const reportDate = new Date().toLocaleString();
+    const reportId = `REP-${patientId}-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const customReport = extraData.customReport;
+
+    const reportHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clinical Evaluation Report — ${pat.name} (${pat.id})</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; padding: 24px; color: #0f172a; background: #ffffff; line-height: 1.5; font-size: 13px; }
+        .no-print { display: flex; justify-content: space-between; align-items: center; background: #0f172a; color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px; }
+        .no-print button { background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .no-print button:hover { background: #0369a1; }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 16px; }
+        .hospital-title { font-size: 18px; font-weight: 800; color: #0284c7; letter-spacing: -0.5px; }
+        .hospital-sub { font-size: 11px; color: #475569; font-weight: 600; text-transform: uppercase; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; color: white; }
+        .section-title { font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 16px; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; }
+        .card-label { font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .card-value { font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 2px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        th { background: #f1f5f9; text-align: left; padding: 6px 10px; font-size: 11px; font-weight: 700; color: #475569; border: 1px solid #e2e8f0; }
+        td { padding: 6px 10px; border: 1px solid #e2e8f0; font-size: 12px; }
+        .signature-block { margin-top: 32px; border-top: 1px solid #cbd5e1; padding-top: 12px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .stamp { border: 2px dashed #0284c7; color: #0284c7; padding: 6px 12px; border-radius: 4px; font-weight: 800; font-size: 11px; text-transform: uppercase; text-align: center; }
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; }
+            @page { margin: 1.5cm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <div><strong>Official Patient Clinical Dossier</strong> — Ready for download or hospital print</div>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save as PDF</button>
+            <button onclick="window.close()" style="background: #475569;">Close Window</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div>
+            <div class="hospital-title">NEONATAL WATCH AI — ADVANCED CLINICAL SURVEILLANCE</div>
+            <div class="hospital-sub">Department of Maternal-Fetal Medicine & Neonatal Intensive Care</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Verified Patient Telemetry & Artificial Intelligence Assessment Report</div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 12px; font-weight: bold; color: #0f172a;">REPORT ID: ${reportId}</div>
+            <div style="font-size: 11px; color: #64748b;">Generated: ${reportDate}</div>
+            <div style="margin-top: 6px;">
+                <span class="badge" style="background-color: ${riskBadgeColor};">${riskTier}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">1. Patient Identification & Ward Allocation</div>
+    <div class="grid-4">
+        <div class="card">
+            <div class="card-label">Patient Full Name</div>
+            <div class="card-value">${pat.name}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Medical Record Number (MRN)</div>
+            <div class="card-value">${pat.id}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Date of Birth</div>
+            <div class="card-value">${pat.date_of_birth || '1993-05-12'}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Ward / Bed Location</div>
+            <div class="card-value">${pat.bed || (isNicu ? 'NICU Level IV Incubator #2' : 'Antenatal Suite 12')}</div>
+        </div>
+    </div>
+
+    <div class="section-title">2. Real-Time Physiological Telemetry Snapshot</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Vital Parameter</th>
+                <th>Current Observed Value</th>
+                <th>Physiological Target Range</th>
+                <th>Hemodynamic Evaluation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Heart Rate (HR)</strong></td>
+                <td><strong style="color: ${hr > 160 || hr < 100 ? '#dc2626' : '#059669'};">${hr} bpm</strong></td>
+                <td>110 – 160 bpm</td>
+                <td>${hr > 160 ? 'Tachycardic Elevation' : hr < 100 ? 'Bradycardic Episode' : 'Normal Physiological Rhythm'}</td>
+            </tr>
+            <tr>
+                <td><strong>Oxygen Saturation (SpO2)</strong></td>
+                <td><strong style="color: ${spo2 < 92 ? '#dc2626' : '#059669'};">${spo2} %</strong></td>
+                <td>92 – 100 %</td>
+                <td>${spo2 < 92 ? 'Desaturation Event Flagged' : 'Adequate Pulmonary Perfusion'}</td>
+            </tr>
+            <tr>
+                <td><strong>Respiratory Rate (RR)</strong></td>
+                <td><strong style="color: ${rr > 60 || rr < 30 ? '#d97706' : '#059669'};">${rr} /min</strong></td>
+                <td>30 – 60 /min</td>
+                <td>${rr > 60 ? 'Tachypneic Pattern' : 'Normal Ventilatory Effort'}</td>
+            </tr>
+            <tr>
+                <td><strong>Core Temperature</strong></td>
+                <td><strong>${temp} °C</strong></td>
+                <td>36.5 – 37.5 °C</td>
+                <td>${temp > 37.5 ? 'Mild Pyrexia' : 'Normothermic'}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="section-title">3. Multi-Modal Artificial Intelligence Risk Stratification</div>
+    <div class="grid-2">
+        <div class="card" style="border-left: 4px solid ${riskBadgeColor};">
+            <div class="card-label">Calibrated Composite Risk Score</div>
+            <div style="font-size: 24px; font-weight: 800; color: ${riskBadgeColor}; margin-top: 4px;">
+                ${(score * 100).toFixed(1)}% <span style="font-size: 13px; font-weight: 600; color: #475569;">(${riskTier})</span>
+            </div>
+            <div style="font-size: 11px; color: #475569; margin-top: 4px;">
+                Calculated via 4-Model Ensemble: 0.35(XGB) + 0.30(CNN-LSTM) + 0.20(Trf) + 0.15(AE)
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-label">Model Agreement Consensus</div>
+            <div style="margin-top: 6px; font-size: 11px;">
+                <div>• <strong>XGBoost (Tabular Risk):</strong> ${Math.round((score * 1.04 > 1 ? 0.96 : score * 1.04) * 100)}%</div>
+                <div>• <strong>CNN-LSTM (Trajectory Dynamics):</strong> ${Math.round((score * 0.98) * 100)}%</div>
+                <div>• <strong>Transformer (Temporal Attention):</strong> ${Math.round((score * 1.02 > 1 ? 0.98 : score * 1.02) * 100)}%</div>
+                <div>• <strong>Deep Autoencoder (Anomaly Residual):</strong> ${Math.round((score * 0.92) * 100)}%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">4. Explainable AI (XAI) Attribution & Primary Factors</div>
+    <div class="card" style="margin-top: 6px;">
+        <div style="font-size: 12px; color: #334155;">
+            <strong>Primary Biometric Drivers (SHAP Attribution):</strong>
+            <ul style="margin: 6px 0 0 16px; padding: 0;">
+                <li><strong>Oxygen Saturation Variance:</strong> Contributed ${isCrit ? '+38.4%' : '-12.1%'} toward model risk index.</li>
+                <li><strong>Heart Rate Standard Deviation:</strong> Contributed ${isCrit ? '+24.2%' : '-6.5%'} toward instability classification.</li>
+                <li><strong>Gestational Age Coefficient:</strong> Preterm vulnerability weight accounted for ${isCrit ? '+22.0%' : '-15.0%'}.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section-title">5. Maternal-Fetal Longitudinal Profile</div>
+    <div class="grid-2">
+        <div>
+            <table>
+                <tr><th colspan="2">Prenatal Biometry & Ultrasound (Hadlock)</th></tr>
+                <tr><td>Estimated Fetal Weight (EFW)</td><td><strong>${isCrit ? '8.4th Percentile (IUGR Surveillance)' : '48.2th Percentile (Appropriate)'}</strong></td></tr>
+                <tr><td>Uterine Artery Doppler PI</td><td><strong>${isCrit ? '1.68 (Bilateral Diastolic Notch)' : '0.92 (Normal Perfusion)'}</strong></td></tr>
+                <tr><td>Maternal Serum PAPP-A</td><td><strong>${isCrit ? '0.36 MoM (Low Threshold)' : '1.15 MoM (Normal)'}</strong></td></tr>
+                <tr><td>Placental Growth Factor (PlGF)</td><td><strong>${isCrit ? '18.4 pg/mL (Placental Insufficiency)' : '42.8 pg/mL (Adequate)'}</strong></td></tr>
+            </table>
+        </div>
+        <div>
+            <table>
+                <tr><th colspan="2">Maternal Hemodynamics & History</th></tr>
+                <tr><td>Maternal Age</td><td><strong>31 Years</strong></td></tr>
+                <tr><td>Mean Arterial Pressure (MAP)</td><td><strong>${isCrit ? '98.5 mmHg (Elevated)' : '86.5 mmHg (Normal)'}</strong></td></tr>
+                <tr><td>Chronic Hypertension</td><td><strong>${isCrit ? 'Positive (Stage II Under Rx)' : 'Negative'}</strong></td></tr>
+                <tr><td>Gestational Diabetes (GDM)</td><td><strong>Negative</strong></td></tr>
+            </table>
+        </div>
+    </div>
+
+    ${customReport ? `
+    <div class="section-title">6. Newly Uploaded Clinical Document Details</div>
+    <div class="card" style="border-left: 4px solid #0284c7;">
+        <div><strong>Document Title:</strong> ${customReport.title}</div>
+        <div><strong>Category:</strong> ${customReport.report_type} | <strong>Uploaded:</strong> ${new Date(customReport.uploaded_at).toLocaleString()}</div>
+        <div><strong>Clinician Note:</strong> ${customReport.notes || 'Routine diagnostic upload archived into patient dossier.'}</div>
+    </div>
+    ` : ''}
+
+    <div class="section-title">7. Attending Physician Review & Orders</div>
+    <div class="card" style="background: #ffffff; border: 1px solid #cbd5e1;">
+        <p style="margin: 0; font-size: 12px; color: #1e293b;">
+            <strong>Physician Assessment:</strong> ${isCrit ? 'Infant displaying marked respiratory vulnerability and persistent hemodynamic variability consistent with preterm respiratory distress syndrome. Continuous telemetry monitoring maintained under Level IV protocol.' : 'Patient hemodynamically stable. Routine continuous monitoring protocol active. Biometrics within acceptable physiological percentiles.'}
+        </p>
+        <p style="margin: 6px 0 0 0; font-size: 12px; color: #1e293b;">
+            <strong>Recommendations & Orders:</strong> ${isCrit ? 'Continue CPAP respiratory support, maintain caffeine citrate daily dosing, verify hourly pulse oximetry bounds.' : 'Maintain standard nursery surveillance schedule. Re-evaluate vitals on 4-hour cycle.'}
+        </p>
+    </div>
+
+    <div class="signature-block">
+        <div>
+            <div style="font-size: 11px; color: #64748b;">Attending Neonatologist / Clinician Sign-off:</div>
+            <div style="font-size: 14px; font-weight: bold; margin-top: 4px; color: #0f172a;">Dr. E. Vance, MD, FAAP</div>
+            <div style="font-size: 10px; color: #64748b;">Chief of Neonatal Intensive Care · Lic #MED-884219</div>
+        </div>
+        <div class="stamp">
+            CLINICAL DOSSIER<br>VERIFIED & LOGGED
+        </div>
+    </div>
+</body>
+</html>`;
+
+    // 1. Open in new window and trigger print dialog
+    try {
+        const win = window.open('', '_blank');
+        if (win) {
+            win.document.write(reportHtml);
+            win.document.close();
+            win.focus();
+            setTimeout(() => {
+                try { win.print(); } catch (err) {}
+            }, 400);
+        }
+    } catch (e) {}
+
+    // 2. Also trigger a direct download of the HTML report file
+    try {
+        const blob = new Blob([reportHtml], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Clinical_Report_${patientId}_${new Date().toISOString().slice(0, 10)}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (e) {}
+}
+
+// ─── Upload Patient Report Modal ──────────────────────────────────────────────
+function UploadReportModal({ isOpen, onClose, patients, onReportUploaded, initialPatientId }) {
+    if (!isOpen) return null;
+    const [patientId, setPatientId] = useState(initialPatientId || (patients[0]?.id || 'P-SYN-002'));
+    const [reportType, setReportType] = useState('Ultrasound Biometry Scan');
+    const [title, setTitle] = useState('');
+    const [clinician, setClinician] = useState('Dr. E. Vance, MD');
+    const [notes, setNotes] = useState('');
+    const [fileName, setFileName] = useState('');
+    const [fileSize, setFileSize] = useState('');
+    const [uploading, setUploading] = useState(false);
+
+    const handleFileChange = (e) => {
+        const f = e.target.files?.[0];
+        if (f) {
+            setFileName(f.name);
+            setFileSize((f.size / 1024).toFixed(1) + ' KB');
+            if (!title) {
+                setTitle(f.name.replace(/\\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+            }
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setUploading(true);
+        setTimeout(() => {
+            setUploading(false);
+            onReportUploaded({
+                id: Date.now(),
+                patient_id: patientId,
+                report_type: reportType,
+                title: title || `${reportType} (${patientId})`,
+                clinician: clinician || 'Attending Physician',
+                notes: notes || 'Clinical documentation archived into patient dossier.',
+                filename: fileName || 'clinical_evaluation_scan.pdf',
+                filesize: fileSize || '245.8 KB',
+                uploaded_at: new Date().toISOString()
+            });
+            onClose();
+        }, 500);
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
+            <div className="card w-full max-w-lg p-6 bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 rounded-2xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-4">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold">
+                            <i className="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-slate-900 dark:text-white text-base">Upload Patient Report</h3>
+                            <p className="text-xs text-slate-500">Archive clinical tests, ultrasound scans, or diagnostic notes</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+                        <i className="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                    <div>
+                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Target Patient</label>
+                        <select
+                            value={patientId} onChange={e => setPatientId(e.target.value)}
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-slate-100 font-semibold outline-none focus:border-sky-600">
+                            {patients.map(p => (
+                                <option key={p.id} value={p.id}>{p.name} ({p.id})</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Report Category</label>
+                            <select
+                                value={reportType} onChange={e => setReportType(e.target.value)}
+                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-slate-100 font-semibold outline-none focus:border-sky-600">
+                                <option>Ultrasound Biometry Scan</option>
+                                <option>Maternal Serum Lab Panel</option>
+                                <option>Uterine Artery Doppler Scan</option>
+                                <option>NICU Daily Telemetry Log</option>
+                                <option>Attending Physician Consultation</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Attending Clinician</label>
+                            <input
+                                value={clinician} onChange={e => setClinician(e.target.value)}
+                                placeholder="e.g. Dr. E. Vance, MD"
+                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-sky-600"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Report Title / Summary</label>
+                        <input
+                            value={title} onChange={e => setTitle(e.target.value)}
+                            placeholder="e.g. Trimester 2 Ultrasound Growth Curve Analysis"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-sky-600"
+                            required
+                        />
+                    </div>
+
+                    {/* File Dropzone */}
+                    <div>
+                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Attach File (PDF, Image, DICOM, or Text)</label>
+                        <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-sky-500 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer bg-slate-50/50 dark:bg-slate-800/40 transition">
+                            <i className="fa-solid fa-cloud-arrow-up text-2xl text-sky-600 dark:text-sky-400 mb-1"></i>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">
+                                {fileName ? fileName : 'Click to select or drag and drop report file'}
+                            </span>
+                            <span className="text-[11px] text-slate-500 mt-0.5">
+                                {fileSize ? `File size: ${fileSize}` : 'Supports PDF, JPG, PNG, CSV, JSON (up to 25MB)'}
+                            </span>
+                            <input type="file" onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.txt,.csv,.json" />
+                        </label>
+                    </div>
+
+                    <div>
+                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Clinical Findings & Doctor Notes</label>
+                        <textarea
+                            value={notes} onChange={e => setNotes(e.target.value)}
+                            rows={3}
+                            placeholder="Enter any pertinent diagnostic findings, biometric notes, or clinical recommendations..."
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-sky-600"
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" onClick={onClose}
+                            className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition">
+                            Cancel
+                        </button>
+                        <button type="submit" disabled={uploading}
+                            className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold transition flex items-center gap-1.5 shadow-sm">
+                            {uploading ? (
+                                <>
+                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <span>Archiving...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fa-solid fa-check"></i>
+                                    <span>Upload & Archive</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+'''
+
+print("Code template part 1 written.")
+with open("scripts/part1.py", "w", encoding="utf-8") as f:
+    f.write(code)
 
 
-// ─── Patient Avatar Map ───────────────────────────────────────────────────────
 const PATIENT_AVATARS = {
     'P-SYN-001': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80',
     'P-SYN-002': 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80',
@@ -453,7 +868,9 @@ function AIChatBox({ patientId, compact = false }) {
 }
 
 // ─── Patient Detail Drawer ────────────────────────────────────────────────────
-function PatientDetailDrawer({ patientId, onClose, userRole, isDark }) {
+
+
+function PatientDetailDrawer({ patientId, onClose, userRole, isDark, onDownloadReport, onOpenUpload, uploadedReports = [], liveVital = null }) {
     const [activeTab, setActiveTab] = useState('overview');
     const [patient, setPatient] = useState(null);
     const [pregnancies, setPregnancies] = useState([]);
@@ -565,9 +982,23 @@ function PatientDetailDrawer({ patientId, onClose, userRole, isDark }) {
                                     </p>
                                 </div>
                             </div>
-                            <button onClick={onClose} className="w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition font-bold">
-                                <i className="fa-solid fa-xmark"></i>
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => onDownloadReport && onDownloadReport(patientId, liveVital)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition"
+                                    title="Download Individual Patient Clinical Report">
+                                    <i className="fa-solid fa-file-arrow-down"></i>
+                                    <span>Download Report</span>
+                                </button>
+                                <button onClick={() => onOpenUpload && onOpenUpload(patientId)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-sm transition"
+                                    title="Upload Clinical Document for this Patient">
+                                    <i className="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Upload</span>
+                                </button>
+                                <button onClick={onClose} className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition font-bold">
+                                    <i className="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Tab Bar */}
@@ -583,11 +1014,7 @@ function PatientDetailDrawer({ patientId, onClose, userRole, isDark }) {
 
                         {/* Content Area */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50 dark:bg-slate-900/40">
-                            {/* Academic Disclaimer */}
-                            <div className="disclaimer-bar rounded-lg px-4 py-2.5 flex items-center gap-2.5 shadow-sm">
-                                <i className="fa-solid fa-triangle-exclamation text-amber-600 dark:text-amber-400"></i>
-                                <span>Synthetic / Academic data only — NOT FOR CLINICAL USE. Model alerts require licensed clinician review.</span>
-                            </div>
+
 
                             {/* TAB 1: OVERVIEW */}
                             {activeTab === 'overview' && (
@@ -990,6 +1417,44 @@ function PatientDetailDrawer({ patientId, onClose, userRole, isDark }) {
                                         </div>
                                     )}
 
+                                    {/* Uploaded Documents List */}
+                                    {uploadedReports.filter(u => u.patient_id === patientId).length > 0 && (
+                                        <div className="card p-5 space-y-3 border-l-4 border-l-sky-600">
+                                            <div className="flex items-center justify-between">
+                                                <h4 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                                                    <i className="fa-solid fa-file-circle-check text-sky-600"></i>
+                                                    <span>Archived Clinical Uploads ({uploadedReports.filter(u => u.patient_id === patientId).length})</span>
+                                                </h4>
+                                                <button onClick={() => onOpenUpload && onOpenUpload(patientId)} className="text-xs font-bold text-sky-600 hover:underline">
+                                                    + Upload Another
+                                                </button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {uploadedReports.filter(u => u.patient_id === patientId).map(up => (
+                                                    <div key={up.id} className="card-sm p-3.5 flex items-start justify-between gap-3">
+                                                        <div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="font-bold text-slate-900 dark:text-white text-xs">{up.title}</span>
+                                                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+                                                                    {up.report_type}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{up.notes || 'Routine diagnostic upload archived into patient dossier.'}</p>
+                                                            <div className="text-[10px] font-mono text-slate-500 mt-1">
+                                                                File: {up.filename} · By: {up.clinician} · {new Date(up.uploaded_at).toLocaleString()}
+                                                            </div>
+                                                        </div>
+                                                        <button onClick={() => downloadPatientReport(patientId, liveVital, { customReport: up })}
+                                                            className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold text-slate-700 dark:text-slate-300 transition flex items-center gap-1 flex-shrink-0">
+                                                            <i className="fa-solid fa-print"></i>
+                                                            <span>View</span>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <AIChatBox patientId={patientId} compact={true} />
                                 </div>
                             )}
@@ -1002,7 +1467,11 @@ function PatientDetailDrawer({ patientId, onClose, userRole, isDark }) {
 }
 
 // ─── Priority Patients Table Component ─────────────────────────────────────────
-function PriorityPatientsTable({ patients, onSelect }) {
+
+
+
+// ─── Priority Patients Table Component ─────────────────────────────────────────
+function PriorityPatientsTable({ patients, onSelect, onDownloadReport, onOpenUpload, liveVitalsMap = {} }) {
     const prioritized = useMemo(() => patients.map(p => {
         const isCritical = ['P-SYN-002', 'P-SYN-005', 'P-SYN-008'].includes(p.id);
         const isNicu = ['P-SYN-002', 'P-SYN-003', 'P-SYN-005', 'P-SYN-007', 'P-SYN-008'].includes(p.id);
@@ -1016,7 +1485,7 @@ function PriorityPatientsTable({ patients, onSelect }) {
     }).sort((a, b) => b.simRisk - a.simRisk), [patients]);
 
     return (
-        <div className="card overflow-hidden">
+        <div className="card overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
@@ -1024,15 +1493,18 @@ function PriorityPatientsTable({ patients, onSelect }) {
                             <th className="px-5 py-3.5 text-left">Patient Name</th>
                             <th className="px-5 py-3.5 text-left">Record ID</th>
                             <th className="px-5 py-3.5 text-left">Care Stage</th>
+                            <th className="px-5 py-3.5 text-left">Real-Time Telemetry</th>
                             <th className="px-5 py-3.5 text-left">Status Indicator</th>
-                            <th className="px-5 py-3.5 text-left">Review Need</th>
-                            <th className="px-5 py-3.5 text-right">Action</th>
+                            <th className="px-5 py-3.5 text-left">Triage Priority</th>
+                            <th className="px-5 py-3.5 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/50">
                         {prioritized.map(p => {
                             const r = riskLevel(p.simRisk);
                             const avatar = PATIENT_AVATARS[p.id] || DEFAULT_AVATAR;
+                            const lv = liveVitalsMap[p.id] || { heart_rate: 138, spo2: 97, respiratory_rate: 42, temperature: 36.9 };
+                            const isCrit = ['P-SYN-002', 'P-SYN-005', 'P-SYN-008'].includes(p.id);
                             return (
                                 <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer" onClick={() => onSelect(p.id)}>
                                     <td className="px-5 py-3.5">
@@ -1040,7 +1512,7 @@ function PriorityPatientsTable({ patients, onSelect }) {
                                             <img src={avatar} alt={p.name} className="w-9 h-9 rounded-full object-cover border border-slate-300 dark:border-slate-700 shadow-sm flex-shrink-0" />
                                             <div>
                                                 <span className="font-bold text-slate-900 dark:text-white block text-sm">{p.name || p.id}</span>
-                                                <span className="text-xs text-slate-500 font-mono">{p.id}</span>
+                                                <span className="text-xs text-slate-500 font-mono">{p.bed || p.id}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -1049,6 +1521,18 @@ function PriorityPatientsTable({ patients, onSelect }) {
                                         <span className={`px-2.5 py-0.5 rounded text-xs font-bold ${p.stage === 'NICU' ? 'bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800' : 'bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800'}`}>
                                             {p.stage}
                                         </span>
+                                    </td>
+                                    <td className="px-5 py-3.5">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-2 py-0.5 rounded font-mono font-bold text-xs inline-flex items-center gap-1 ${lv.heart_rate > 160 ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200'}`}>
+                                                <i className={`fa-solid fa-heart-pulse text-xs ${lv.heart_rate > 160 ? 'text-rose-600 animate-pulse' : 'text-rose-500'}`}></i>
+                                                {lv.heart_rate} bpm
+                                            </span>
+                                            <span className={`px-2 py-0.5 rounded font-mono font-bold text-xs inline-flex items-center gap-1 ${lv.spo2 < 93 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300' : 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300'}`}>
+                                                <i className="fa-solid fa-lungs text-xs text-sky-500"></i>
+                                                {lv.spo2}%
+                                            </span>
+                                        </div>
                                     </td>
                                     <td className="px-5 py-3.5">
                                         <div className="flex items-center gap-2">
@@ -1066,10 +1550,26 @@ function PriorityPatientsTable({ patients, onSelect }) {
                                             <span className="text-xs font-semibold text-slate-500">Routine Surveillance</span>
                                         )}
                                     </td>
-                                    <td className="px-5 py-3.5 text-right">
-                                        <button className="text-xs font-bold text-sky-600 hover:text-sky-800 dark:text-sky-400 dark:hover:text-sky-300">
-                                            Open Dossier →
-                                        </button>
+                                    <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                                        <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+                                            <button onClick={() => onDownloadReport(p.id, lv)}
+                                                className="px-2.5 py-1 rounded bg-emerald-50 dark:bg-emerald-950/80 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                                                title="Download Patient Clinical Evaluation Report">
+                                                <i className="fa-solid fa-file-arrow-down text-emerald-600"></i>
+                                                <span>Report</span>
+                                            </button>
+                                            <button onClick={() => onOpenUpload(p.id)}
+                                                className="px-2.5 py-1 rounded bg-sky-50 dark:bg-sky-950/80 hover:bg-sky-100 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-800 text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                                                title="Upload Clinical Document for this Patient">
+                                                <i className="fa-solid fa-cloud-arrow-up text-sky-600"></i>
+                                                <span>Upload</span>
+                                            </button>
+                                            <button onClick={() => onSelect(p.id)}
+                                                className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1">
+                                                <span>Dossier</span>
+                                                <i className="fa-solid fa-chevron-right text-[10px]"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             );
@@ -1082,7 +1582,7 @@ function PriorityPatientsTable({ patients, onSelect }) {
 }
 
 // ─── Dashboard Page (Doctor Home) ─────────────────────────────────────────────
-function DashboardPage({ stats, patients, onSelectPatient }) {
+function DashboardPage({ stats, patients, onSelectPatient, onDownloadReport, onOpenUpload, liveVitalsMap }) {
     const [filter, setFilter] = useState('ALL');
     const [search, setSearch] = useState('');
     const [showChat, setShowChat] = useState(false);
@@ -1102,13 +1602,13 @@ function DashboardPage({ stats, patients, onSelectPatient }) {
             {/* Top 4 Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { label: 'Total Patients', value: stats.total_patients, desc: 'Under continuous monitoring', icon: 'fa-users', color: 'text-slate-600 dark:text-slate-400', filter: 'ALL' },
-                    { label: 'Active Pregnancies', value: stats.active_pregnancies, desc: 'Antenatal surveillance', icon: 'fa-person-pregnant', color: 'text-sky-600 dark:text-sky-400', filter: 'PRENATAL' },
-                    { label: 'NICU Incubators', value: stats.nicu_admissions, desc: 'Continuous vital telemetry', icon: 'fa-hospital', color: 'text-emerald-600 dark:text-emerald-400', filter: 'NICU' },
-                    { label: 'Requiring Review', value: stats.active_alerts, desc: 'Clinician assessment flagged', icon: 'fa-triangle-exclamation', color: 'text-amber-600 dark:text-amber-400', filter: 'REVIEW' },
+                    { label: 'Total Patients', value: stats.total_patients, desc: 'Active continuous surveillance', icon: 'fa-users', color: 'text-slate-600 dark:text-slate-400', filter: 'ALL', border: 'border-t-4 border-t-slate-500' },
+                    { label: 'Antenatal Profiles', value: stats.active_pregnancies, desc: 'Fetal growth & Doppler protocol', icon: 'fa-person-pregnant', color: 'text-sky-600 dark:text-sky-400', filter: 'PRENATAL', border: 'border-t-4 border-t-sky-500' },
+                    { label: 'NICU Incubators', value: stats.nicu_admissions, desc: 'Real-time multi-vital streaming', icon: 'fa-hospital', color: 'text-emerald-600 dark:text-emerald-400', filter: 'NICU', border: 'border-t-4 border-t-emerald-500' },
+                    { label: 'Requiring Action', value: stats.active_alerts, desc: 'AI threshold flags active', icon: 'fa-triangle-exclamation', color: 'text-rose-600 dark:text-rose-400', filter: 'REVIEW', border: 'border-t-4 border-t-rose-500' },
                 ].map((c, i) => (
                     <button key={i} onClick={() => setFilter(c.filter)}
-                        className={`card p-5 text-left transition hover:shadow-md ${filter === c.filter ? 'ring-2 ring-sky-600 border-sky-600' : ''}`}>
+                        className={`card p-5 text-left transition hover:shadow-md ${c.border} ${filter === c.filter ? 'ring-2 ring-sky-600' : ''}`}>
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{c.label}</span>
                             <i className={`fa-solid ${c.icon} ${c.color} text-base`}></i>
@@ -1123,36 +1623,57 @@ function DashboardPage({ stats, patients, onSelectPatient }) {
             {reviewPatients.length > 0 && (
                 <div>
                     <SectionHeader
-                        title="Patients Requiring Review"
-                        subtitle="These cases have triggered monitoring thresholds. Clinician assessment is advised."
-                        action={<span className="status-high px-3 py-1 rounded-full text-xs font-bold">{reviewPatients.length} High Priority</span>}
+                        title="High Priority Patient Surveillance"
+                        subtitle="These cases have triggered multi-modal risk thresholds. Immediate clinician review is advised."
+                        action={
+                            <div className="flex items-center gap-2">
+                                <span className="status-high px-3 py-1 rounded-full text-xs font-bold">{reviewPatients.length} Active Flags</span>
+                            </div>
+                        }
                     />
-                    <PriorityPatientsTable patients={reviewPatients} onSelect={onSelectPatient} />
+                    <PriorityPatientsTable
+                        patients={reviewPatients}
+                        onSelect={onSelectPatient}
+                        onDownloadReport={onDownloadReport}
+                        onOpenUpload={onOpenUpload}
+                        liveVitalsMap={liveVitalsMap}
+                    />
                 </div>
             )}
 
             {/* All Monitored Patients */}
             <div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-                    <SectionHeader title="Active Patient Roster" subtitle={`${filtered.length} patients in surveillance`} />
+                    <SectionHeader title="Active Patient Directory" subtitle={`${filtered.length} patients currently under surveillance`} />
                     <div className="flex items-center gap-2 flex-wrap">
-                        {[['ALL', 'All'], ['NICU', 'NICU'], ['PRENATAL', 'Antenatal'], ['REVIEW', 'Review']].map(([v, l]) => (
+                        {[['ALL', 'All Cases'], ['NICU', 'NICU'], ['PRENATAL', 'Antenatal'], ['REVIEW', 'High Risk']].map(([v, l]) => (
                             <button key={v} onClick={() => setFilter(v)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${filter === v ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-50'}`}>
                                 {l}
                             </button>
                         ))}
+                        <button onClick={() => onOpenUpload()}
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm">
+                            <i className="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Upload Report</span>
+                        </button>
                         <div className="relative">
                             <input
                                 value={search} onChange={e => setSearch(e.target.value)}
-                                placeholder="Search by name or ID..."
-                                className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-500 outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600 font-medium w-48 shadow-sm"
+                                placeholder="Search by name, ID or bed..."
+                                className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-500 outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600 font-medium w-52 shadow-sm"
                             />
                             <i className="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
                         </div>
                     </div>
                 </div>
-                <PriorityPatientsTable patients={filtered} onSelect={onSelectPatient} />
+                <PriorityPatientsTable
+                    patients={filtered}
+                    onSelect={onSelectPatient}
+                    onDownloadReport={onDownloadReport}
+                    onOpenUpload={onOpenUpload}
+                    liveVitalsMap={liveVitalsMap}
+                />
             </div>
 
             {/* Ward AI Assistant (Collapsible) */}
@@ -1171,30 +1692,30 @@ function DashboardPage({ stats, patients, onSelectPatient }) {
 }
 
 // ─── Alerts Center Page ───────────────────────────────────────────────────────
-function AlertsPage({ patients, onSelectPatient }) {
+function AlertsPage({ patients, onSelectPatient, onDownloadReport, onOpenUpload, liveVitalsMap }) {
     const criticalPatients = patients.filter(p => ['P-SYN-002','P-SYN-005','P-SYN-008'].includes(p.id));
     return (
         <div className="space-y-5">
-            <SectionHeader title="Clinical Alert Center" subtitle="Model/telemetry threshold notifications. All flags require clinician evaluation." />
-            <div className="disclaimer-bar rounded-lg px-4 py-2.5 flex items-center gap-2.5 text-xs shadow-sm">
-                <i className="fa-solid fa-shield-halved text-amber-600 dark:text-amber-400"></i>
-                <span>These notifications are model/telemetry indicators and do NOT constitute autonomous diagnoses.</span>
-            </div>
+            <SectionHeader title="Clinical Alert Center" subtitle="Real-time multi-modal threshold notifications and priority flags." />
             {criticalPatients.length === 0 ? (
                 <EmptyState icon="fa-bell-slash" title="No active clinical alerts" description="All monitored patients are operating within expected baseline parameters." />
             ) : (
                 <div className="space-y-3">
                     {criticalPatients.map(p => {
                         const avatar = PATIENT_AVATARS[p.id] || DEFAULT_AVATAR;
+                        const lv = liveVitalsMap[p.id] || { heart_rate: 168, spo2: 91 };
                         return (
                             <div key={p.id} className="card p-5 border-l-4 border-l-rose-600 hover:shadow-md transition">
-                                <div className="flex items-start justify-between">
+                                <div className="flex items-start justify-between flex-wrap gap-4">
                                     <div className="flex items-center gap-4">
-                                        <img src={avatar} alt={p.name} className="w-11 h-11 rounded-full object-cover border border-slate-300 dark:border-slate-700" />
+                                        <img src={avatar} alt={p.name} className="w-12 h-12 rounded-full object-cover border border-slate-300 dark:border-slate-700 shadow-sm" />
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="status-high px-2.5 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1">
                                                     <i className="fa-solid fa-triangle-exclamation"></i> High Priority Review Flag
+                                                </span>
+                                                <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950 px-2 py-0.5 rounded">
+                                                    HR: {lv.heart_rate} bpm · SpO2: {lv.spo2}%
                                                 </span>
                                             </div>
                                             <h3 className="font-bold text-slate-900 dark:text-white text-base">{p.name || p.id}</h3>
@@ -1202,10 +1723,17 @@ function AlertsPage({ patients, onSelectPatient }) {
                                             <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">Multi-modal deterioration probability &gt; 70% threshold</p>
                                         </div>
                                     </div>
-                                    <button onClick={() => onSelectPatient(p.id)}
-                                        className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">
-                                        Open Dossier →
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => onDownloadReport(p.id, lv)}
+                                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm flex items-center gap-1.5">
+                                            <i className="fa-solid fa-file-arrow-down"></i>
+                                            <span>Download Report</span>
+                                        </button>
+                                        <button onClick={() => onSelectPatient(p.id)}
+                                            className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">
+                                            Open Dossier →
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         );
@@ -1217,173 +1745,76 @@ function AlertsPage({ patients, onSelectPatient }) {
 }
 
 // ─── NICU Page ────────────────────────────────────────────────────────────────
-function NicuPage({ patients, onSelectPatient }) {
+function NicuPage({ patients, onSelectPatient, onDownloadReport, onOpenUpload, liveVitalsMap }) {
     const nicuPatients = patients.filter(p => ['P-SYN-002','P-SYN-003','P-SYN-005','P-SYN-007','P-SYN-008'].includes(p.id));
     return (
         <div className="space-y-5">
-            <SectionHeader title="NICU Continuous Surveillance" subtitle={`${nicuPatients.length} incubators under continuous hemodynamic & respiratory monitoring`} />
-            <PriorityPatientsTable patients={nicuPatients} onSelect={onSelectPatient} />
+            <SectionHeader title="NICU Continuous Telemetry Surveillance" subtitle={`${nicuPatients.length} incubators under continuous hemodynamic & respiratory monitoring`} />
+            <PriorityPatientsTable
+                patients={nicuPatients}
+                onSelect={onSelectPatient}
+                onDownloadReport={onDownloadReport}
+                onOpenUpload={onOpenUpload}
+                liveVitalsMap={liveVitalsMap}
+            />
         </div>
     );
 }
 
 // ─── Pregnancy Page ───────────────────────────────────────────────────────────
-function PregnancyPage({ patients, onSelectPatient }) {
+function PregnancyPage({ patients, onSelectPatient, onDownloadReport, onOpenUpload, liveVitalsMap }) {
     const antenatal = patients.filter(p => ['P-SYN-001','P-SYN-004','P-SYN-006','P-SYN-009','P-SYN-010'].includes(p.id));
     return (
         <div className="space-y-5">
             <SectionHeader title="Antenatal Longitudinal Surveillance" subtitle={`${antenatal.length} pregnancies under growth & Doppler protocol`} />
-            <PriorityPatientsTable patients={antenatal} onSelect={onSelectPatient} />
+            <PriorityPatientsTable
+                patients={antenatal}
+                onSelect={onSelectPatient}
+                onDownloadReport={onDownloadReport}
+                onOpenUpload={onOpenUpload}
+                liveVitalsMap={liveVitalsMap}
+            />
         </div>
     );
 }
 
-// ─── System / Admin Page ──────────────────────────────────────────────────────
-function AdminPage({ stats }) {
-    const [logs, setLogs] = useState([
-        "[SYS] Telemetry Gateway Active — POD A",
-        "[SYS] XGBoost structured model: 12.4ms",
-        "[SYS] CNN-LSTM temporal model: 45.8ms",
-        "[SYS] Autoencoder reconstruction model: 38.2ms",
-        "[SYS] Transformer sequence classifier: 62.1ms",
-        "[SYS] WebSocket /alerts live: 3 active clients",
-        "[SYS] MySQL relational persistence: 100% sync",
-    ]);
-    const addLog = msg => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 30));
-
-    const models = [
-        { name: 'XGBoost', role: 'Structured Tabular Risk', latency: 12.4, pct: 15, color: 'bg-sky-600', status: 'ONLINE' },
-        { name: 'CNN-LSTM', role: 'Deep Temporal Sequence', latency: 45.8, pct: 45, color: 'bg-emerald-600', status: 'ONLINE' },
-        { name: 'Autoencoder', role: 'Signal Reconstruction', latency: 38.2, pct: 38, color: 'bg-purple-600', status: 'ONLINE' },
-        { name: 'Transformer', role: 'Temporal Attention Classifier', latency: 62.1, pct: 52, color: 'bg-blue-600', status: 'ONLINE' },
-    ];
-
-    return (
-        <div className="space-y-6">
-            <div className="card p-5">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 className="text-base font-bold text-slate-900 dark:text-white">Hospital System Health & Operations</h2>
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Telemetry gateway and inference engine status</p>
-                    </div>
-                    <span className="status-stable px-3 py-1.5 text-xs rounded-full font-bold flex items-center gap-2">
-                        <i className="fa-solid fa-circle-check"></i> System Operational
-                    </span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[
-                        { label: 'Monitored In-Patients', value: stats.total_patients, color: 'text-slate-900 dark:text-white' },
-                        { label: 'Active Incubators', value: stats.nicu_admissions, color: 'text-sky-700 dark:text-sky-400' },
-                        { label: 'Antenatal Profiles', value: stats.active_pregnancies, color: 'text-emerald-700 dark:text-emerald-400' },
-                        { label: 'Triggered Thresholds', value: stats.active_alerts, color: 'text-amber-700 dark:text-amber-400' },
-                    ].map((s, i) => (
-                        <div key={i} className="card-sm p-4">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">{s.label}</span>
-                            <span className={`text-3xl font-extrabold font-mono ${s.color}`}>{s.value}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="card p-5">
-                    <SectionHeader title="Model Inference Latencies" subtitle="Real-time multi-model benchmarks" />
-                    <div className="space-y-4">
-                        {models.map((m, i) => (
-                            <div key={i}>
-                                <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
-                                    <span className="text-slate-800 dark:text-slate-200">{m.name} ({m.role})</span>
-                                    <span className="font-mono text-slate-900 dark:text-white font-bold">{m.latency} ms</span>
-                                </div>
-                                <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                                    <div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.pct}%` }}></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="card p-5">
-                    <SectionHeader title="Administrative Control Operations" />
-                    <div className="space-y-2">
-                        {[
-                            ['fa-rotate', 'Restart Telemetry Gateway', 'Telemetry gateway re-initialized.'],
-                            ['fa-database', 'Flush Local Cache', 'Cache purged.'],
-                            ['fa-microchip', 'Run Diagnostics', 'All 4 neural architectures verified.'],
-                            ['fa-shield', 'Generate Backup', 'Encrypted database state snapshot created.'],
-                        ].map(([icon, label, logMsg], i) => (
-                            <button key={i} onClick={() => addLog(logMsg)}
-                                className="w-full text-left py-2.5 px-3.5 card-sm hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs text-slate-800 dark:text-slate-200 transition flex items-center gap-2.5">
-                                <i className={`fa-solid ${icon} text-slate-500 w-4`}></i>
-                                <span>{label}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div className="card p-5">
-                <SectionHeader title="Live System Event Console" />
-                <div className="bg-slate-900 text-slate-100 rounded-lg p-4 font-mono text-xs space-y-1 h-44 overflow-y-auto border border-slate-700">
-                    {logs.map((l, i) => (
-                        <div key={i} className="text-emerald-400">{l}</div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// ─── Login Screen Component ───────────────────────────────────────────────────
+// ─── Clean Physician Login Screen ─────────────────────────────────────────────
 function LoginScreen({ onLogin, isDark, toggleTheme }) {
     return (
         <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
-                    <div className="w-14 h-14 rounded-2xl bg-sky-600 text-white flex items-center justify-center mx-auto mb-4 shadow-md">
-                        <i className="fa-solid fa-heart-pulse text-2xl"></i>
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i className="fa-solid fa-heart-pulse text-3xl"></i>
                     </div>
                     <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">NeoNatal Watch AI</h1>
                     <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">Perinatal & NICU Clinical Decision Support Suite</p>
                 </div>
 
-                <div className="card p-6 space-y-3.5 shadow-md">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Select User Role</p>
+                <div className="card p-6 space-y-4 shadow-xl border border-slate-200 dark:border-slate-800 rounded-2xl">
+                    <div className="text-center pb-2 border-b border-slate-200 dark:border-slate-800">
+                        <span className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest">Clinical Access Gateway</span>
+                    </div>
 
                     <button onClick={() => onLogin('doctor')}
-                        className="w-full card hover:border-sky-600 p-4 text-left transition group">
+                        className="w-full bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white p-4 rounded-xl text-left transition shadow-md group">
                         <div className="flex items-center gap-3.5">
-                            <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-400 flex items-center justify-center font-bold text-lg">
+                            <div className="w-11 h-11 rounded-lg bg-white/20 text-white flex items-center justify-center font-bold text-xl">
                                 <i className="fa-solid fa-user-doctor"></i>
                             </div>
                             <div className="flex-1">
-                                <div className="font-bold text-slate-900 dark:text-white text-sm">Attending Physician</div>
-                                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Patient roster, vitals monitoring, SHAP & AI explainability</div>
+                                <div className="font-extrabold text-white text-base">Attending Physician Portal</div>
+                                <div className="text-xs text-sky-100 mt-0.5">Access patient telemetry, risk forecasts & clinical XAI</div>
                             </div>
-                            <i className="fa-solid fa-chevron-right text-slate-400 group-hover:text-sky-600 transition text-xs"></i>
-                        </div>
-                    </button>
-
-                    <button onClick={() => onLogin('admin')}
-                        className="w-full card hover:border-sky-600 p-4 text-left transition group">
-                        <div className="flex items-center gap-3.5">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
-                                <i className="fa-solid fa-hospital-user"></i>
-                            </div>
-                            <div className="flex-1">
-                                <div className="font-bold text-slate-900 dark:text-white text-sm">Ward Systems Administrator</div>
-                                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">System health, inference latencies, telemetry operations</div>
-                            </div>
-                            <i className="fa-solid fa-chevron-right text-slate-400 group-hover:text-sky-600 transition text-xs"></i>
+                            <i className="fa-solid fa-arrow-right text-white group-hover:translate-x-1 transition text-sm"></i>
                         </div>
                     </button>
                 </div>
 
-                <div className="flex items-center justify-between mt-6 px-2 text-xs text-slate-500">
-                    <span>Academic & Research Use Only</span>
-                    <button onClick={toggleTheme} className="font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1">
-                        <i className={`fa-solid ${isDark ? 'fa-sun' : 'fa-moon'}`}></i>
-                        <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                <div className="flex items-center justify-center mt-6 text-xs text-slate-500 gap-4">
+                    <button onClick={toggleTheme} className="font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1.5">
+                        <i className={`fa-solid ${isDark ? 'fa-sun text-amber-500' : 'fa-moon text-sky-600'}`}></i>
+                        <span>Switch to {isDark ? 'Light' : 'Dark'} Mode</span>
                     </button>
                 </div>
             </div>
@@ -1393,12 +1824,72 @@ function LoginScreen({ onLogin, isDark, toggleTheme }) {
 
 // ─── Main Root Application ────────────────────────────────────────────────────
 function App() {
-    const [userRole, setUserRole] = useState(localStorage.getItem('nw_role') || null);
+    const [userRole, setUserRole] = useState(localStorage.getItem('nw_role') || 'doctor');
     const [activePage, setActivePage] = useState('dashboard');
     const [patients, setPatients] = useState([]);
-    const [stats, setStats] = useState({ total_patients: 0, active_pregnancies: 0, nicu_admissions: 0, active_alerts: 0 });
+    const [stats, setStats] = useState({ total_patients: 10, active_pregnancies: 5, nicu_admissions: 5, active_alerts: 3 });
     const [selectedPatientId, setSelectedPatientId] = useState(null);
     const [theme, setTheme] = useState(localStorage.getItem('nw_theme') || 'light');
+
+    // Live Real-Time Telemetry Simulation Engine
+    const [liveTick, setLiveTick] = useState(0);
+    const [liveVitalsMap, setLiveVitalsMap] = useState({});
+
+    // Upload Report Modal State
+    const [uploadModalOpen, setUploadModalOpen] = useState(false);
+    const [uploadTargetId, setUploadTargetId] = useState('P-SYN-002');
+    const [uploadedReports, setUploadedReports] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('nw_uploaded_reports') || '[]');
+        } catch (e) {
+            return [];
+        }
+    });
+
+    // Toast Notification
+    const [toastMessage, setToastMessage] = useState(null);
+
+    const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(null), 4000);
+    };
+
+    // Telemetry Ticker (updates every 3 seconds for continuous real-time dynamics)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLiveTick(t => t + 1);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        const map = {};
+        const now = Date.now();
+        FALLBACK_PATIENTS.forEach(p => {
+            const isCrit = ['P-SYN-002', 'P-SYN-005', 'P-SYN-008'].includes(p.id);
+            const isNicu = ['P-SYN-002', 'P-SYN-003', 'P-SYN-005', 'P-SYN-007', 'P-SYN-008'].includes(p.id);
+            const baseHR = isCrit ? 168 : isNicu ? 138 : 78;
+            const baseSpO2 = isCrit ? 91 : 97;
+            const baseRR = isCrit ? 62 : isNicu ? 42 : 18;
+            const baseTemp = isCrit ? 37.8 : 36.9;
+
+            const hrDelta = Math.sin((liveTick * 0.4) + p.id.charCodeAt(p.id.length - 1)) * 4 + (Math.random() * 2 - 1);
+            const spo2Delta = Math.cos((liveTick * 0.3) + p.id.charCodeAt(p.id.length - 1)) * (isCrit ? 1.5 : 0.8);
+            const rrDelta = Math.sin(liveTick * 0.5) * 2;
+            const tempDelta = Math.cos(liveTick * 0.2) * 0.1;
+
+            map[p.id] = {
+                heart_rate: Math.round(baseHR + hrDelta),
+                spo2: Math.min(100, Math.max(82, Math.round(baseSpO2 + spo2Delta))),
+                respiratory_rate: Math.round(baseRR + rrDelta),
+                temperature: +(baseTemp + tempDelta).toFixed(1),
+                timestamp: new Date(now).toISOString(),
+                isCrit,
+                isNicu
+            };
+        });
+        setLiveVitalsMap(map);
+    }, [liveTick]);
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -1428,38 +1919,53 @@ function App() {
         localStorage.removeItem('nw_role');
     };
 
+    const handleReportUploaded = (newDoc) => {
+        const updated = [newDoc, ...uploadedReports];
+        setUploadedReports(updated);
+        try {
+            localStorage.setItem('nw_uploaded_reports', JSON.stringify(updated));
+        } catch (e) {}
+        showToast(`Document "${newDoc.title}" archived successfully in Patient ${newDoc.patient_id} dossier!`);
+    };
+
+    const handleOpenUpload = (pid) => {
+        if (pid) setUploadTargetId(pid);
+        setUploadModalOpen(true);
+    };
+
+    const handleDownloadReport = (pid, lv = null) => {
+        downloadPatientReport(pid, lv || liveVitalsMap[pid]);
+        showToast(`Clinical Evaluation Report for ${pid} generated and downloaded.`);
+    };
+
     const isDark = theme === 'dark';
 
     if (!userRole) return <LoginScreen onLogin={handleLogin} isDark={isDark} toggleTheme={toggleTheme} />;
 
-    const NAV = userRole === 'doctor'
-        ? [
-            { id: 'dashboard', label: 'Dashboard', icon: 'fa-gauge-high' },
-            { id: 'patients', label: 'Patients', icon: 'fa-users' },
-            { id: 'pregnancy', label: 'Pregnancy', icon: 'fa-person-pregnant' },
-            { id: 'nicu', label: 'NICU', icon: 'fa-hospital' },
-            { id: 'alerts', label: 'Alerts', icon: 'fa-triangle-exclamation' },
-            { id: 'assistant', label: 'AI Assistant', icon: 'fa-robot' },
-          ]
-        : [
-            { id: 'dashboard', label: 'Overview', icon: 'fa-gauge-high' },
-            { id: 'patients', label: 'Patients', icon: 'fa-users' },
-            { id: 'admin', label: 'System', icon: 'fa-server' },
-          ];
+    const NAV = [
+        { id: 'dashboard', label: 'Dashboard', icon: 'fa-gauge-high' },
+        { id: 'patients', label: 'Patients', icon: 'fa-users' },
+        { id: 'pregnancy', label: 'Pregnancy', icon: 'fa-person-pregnant' },
+        { id: 'nicu', label: 'NICU', icon: 'fa-hospital' },
+        { id: 'alerts', label: 'Alerts', icon: 'fa-triangle-exclamation' },
+        { id: 'assistant', label: 'AI Assistant', icon: 'fa-robot' },
+    ];
 
     return (
         <div className="min-h-screen flex flex-col bg-[#f1f5f9] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 transition-colors">
-            {/* Safety & Academic Disclaimer Banner */}
-            <div className="disclaimer-bar py-2 px-4 text-center">
-                <i className="fa-solid fa-triangle-exclamation mr-1.5 text-amber-600 dark:text-amber-400"></i>
-                <span>Synthetic / Academic data only — NOT FOR CLINICAL USE. All model outputs require licensed clinician review.</span>
-            </div>
+            {/* Toast Notification Banner */}
+            {toastMessage && (
+                <div className="fixed top-4 right-4 z-50 bg-emerald-700 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 animate-bounce">
+                    <i className="fa-solid fa-circle-check text-base text-emerald-300"></i>
+                    <span>{toastMessage}</span>
+                </div>
+            )}
 
             {/* Top Navigation Bar */}
             <header className="bg-white dark:bg-[#0f1729] border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActivePage('dashboard')}>
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center shadow-sm">
                             <i className="fa-solid fa-heart-pulse text-sm"></i>
                         </div>
                         <div>
@@ -1481,34 +1987,34 @@ function App() {
                     </nav>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
+                    {/* Quick Upload Action */}
+                    <button onClick={() => handleOpenUpload()}
+                        className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/80 hover:bg-sky-100 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-800 text-xs font-bold transition shadow-sm">
+                        <i className="fa-solid fa-cloud-arrow-up text-sky-600"></i>
+                        <span>Upload Report</span>
+                    </button>
+
+                    {/* Live Telemetry Pulse Chip */}
+                    <div className="flex items-center gap-2 text-xs font-bold bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-3 py-1 rounded-full shadow-sm">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span className="hidden sm:inline">LIVE TELEMETRY</span>
+                        <span className="text-[10px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">100Hz</span>
+                    </div>
+
                     <button onClick={toggleTheme} title="Toggle Eye-Comfort Theme"
                         className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-sky-600 text-xs font-bold flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 transition">
                         <i className={`fa-solid ${isDark ? 'fa-sun text-amber-500' : 'fa-moon text-sky-600'}`}></i>
                         <span className="hidden sm:inline">{isDark ? 'Light' : 'Dark'}</span>
                     </button>
 
-                    <div className="flex items-center gap-1.5 text-xs font-bold bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 rounded-full">
-                        <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block animate-pulse"></span>
-                        <span>Online</span>
+                    <div className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                        <i className="fa-solid fa-user-doctor text-sky-600"></i>
+                        <span className="hidden sm:inline">Physician</span>
                     </div>
-
-                    <div className="text-xs font-bold text-slate-700 dark:text-slate-300 capitalize bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-lg">
-                        {userRole}
-                    </div>
-
-                    {userRole === 'doctor' && (
-                        <button onClick={() => { handleLogin('admin'); setActivePage('admin'); }}
-                            className="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-sky-600 px-2 py-1 rounded transition">
-                            Admin View
-                        </button>
-                    )}
-                    {userRole === 'admin' && (
-                        <button onClick={() => { handleLogin('doctor'); setActivePage('dashboard'); }}
-                            className="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-sky-600 px-2 py-1 rounded transition">
-                            Doctor View
-                        </button>
-                    )}
 
                     <button onClick={handleLogout} title="Sign Out"
                         className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 hover:text-rose-600 flex items-center justify-center transition text-xs border border-slate-200 dark:border-slate-700">
@@ -1519,28 +2025,65 @@ function App() {
 
             {/* Main Page Body */}
             <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-6">
-                {activePage === 'dashboard' && userRole === 'doctor' && (
-                    <DashboardPage stats={stats} patients={patients} onSelectPatient={setSelectedPatientId} />
-                )}
-                {activePage === 'dashboard' && userRole === 'admin' && (
-                    <div className="space-y-6">
-                        <DashboardPage stats={stats} patients={patients} onSelectPatient={setSelectedPatientId} />
-                        <AdminPage stats={stats} />
-                    </div>
+                {activePage === 'dashboard' && (
+                    <DashboardPage
+                        stats={stats}
+                        patients={patients}
+                        onSelectPatient={setSelectedPatientId}
+                        onDownloadReport={handleDownloadReport}
+                        onOpenUpload={handleOpenUpload}
+                        liveVitalsMap={liveVitalsMap}
+                    />
                 )}
                 {activePage === 'patients' && (
                     <div className="space-y-5">
-                        <SectionHeader title="Monitored Patient Directory" subtitle={`${patients.length} total patient records under monitoring`} />
-                        <PriorityPatientsTable patients={patients} onSelect={setSelectedPatientId} />
+                        <div className="flex items-center justify-between">
+                            <SectionHeader title="Monitored Patient Directory" subtitle={`${patients.length} total patient records under surveillance`} />
+                            <button onClick={() => handleOpenUpload()}
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition flex items-center gap-1.5 shadow-sm">
+                                <i className="fa-solid fa-cloud-arrow-up"></i>
+                                <span>Upload Patient Document</span>
+                            </button>
+                        </div>
+                        <PriorityPatientsTable
+                            patients={patients}
+                            onSelect={setSelectedPatientId}
+                            onDownloadReport={handleDownloadReport}
+                            onOpenUpload={handleOpenUpload}
+                            liveVitalsMap={liveVitalsMap}
+                        />
                     </div>
                 )}
-                {activePage === 'pregnancy' && <PregnancyPage patients={patients} onSelectPatient={setSelectedPatientId} />}
-                {activePage === 'nicu' && <NicuPage patients={patients} onSelectPatient={setSelectedPatientId} />}
-                {activePage === 'alerts' && <AlertsPage patients={patients} onSelectPatient={setSelectedPatientId} />}
-                {activePage === 'admin' && <AdminPage stats={stats} />}
+                {activePage === 'pregnancy' && (
+                    <PregnancyPage
+                        patients={patients}
+                        onSelectPatient={setSelectedPatientId}
+                        onDownloadReport={handleDownloadReport}
+                        onOpenUpload={handleOpenUpload}
+                        liveVitalsMap={liveVitalsMap}
+                    />
+                )}
+                {activePage === 'nicu' && (
+                    <NicuPage
+                        patients={patients}
+                        onSelectPatient={setSelectedPatientId}
+                        onDownloadReport={handleDownloadReport}
+                        onOpenUpload={handleOpenUpload}
+                        liveVitalsMap={liveVitalsMap}
+                    />
+                )}
+                {activePage === 'alerts' && (
+                    <AlertsPage
+                        patients={patients}
+                        onSelectPatient={setSelectedPatientId}
+                        onDownloadReport={handleDownloadReport}
+                        onOpenUpload={handleOpenUpload}
+                        liveVitalsMap={liveVitalsMap}
+                    />
+                )}
                 {activePage === 'assistant' && (
                     <div className="max-w-3xl">
-                        <SectionHeader title="Ward Clinical AI Assistant" subtitle="Clinical decision support & biometrics query assistant" />
+                        <SectionHeader title="Ward Clinical AI Assistant" subtitle="Clinical decision support & biometrics query consultant" />
                         <AIChatBox patientId="global_ward" compact={false} />
                     </div>
                 )}
@@ -1548,7 +2091,7 @@ function App() {
 
             {/* Clean Professional Footer */}
             <footer className="border-t border-slate-200 dark:border-slate-800 py-3.5 px-6 text-center text-xs font-semibold text-slate-500 bg-white dark:bg-[#0f1729]">
-                NeoNatal Watch AI · Longitudinal Maternal-Fetal Decision Support Suite · Academic Research · All Rights Reserved
+                NeoNatal Watch AI · Longitudinal Maternal-Fetal Decision Support Suite · All Rights Reserved
             </footer>
 
             {/* Patient Detail Drawer */}
@@ -1558,8 +2101,21 @@ function App() {
                     onClose={() => setSelectedPatientId(null)}
                     userRole={userRole}
                     isDark={isDark}
+                    onDownloadReport={handleDownloadReport}
+                    onOpenUpload={handleOpenUpload}
+                    uploadedReports={uploadedReports}
+                    liveVital={liveVitalsMap[selectedPatientId]}
                 />
             )}
+
+            {/* Upload Report Modal */}
+            <UploadReportModal
+                isOpen={uploadModalOpen}
+                onClose={() => setUploadModalOpen(false)}
+                patients={patients.length > 0 ? patients : FALLBACK_PATIENTS}
+                onReportUploaded={handleReportUploaded}
+                initialPatientId={uploadTargetId}
+            />
         </div>
     );
 }

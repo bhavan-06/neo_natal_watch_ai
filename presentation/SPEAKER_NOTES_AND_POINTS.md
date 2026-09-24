@@ -193,3 +193,4 @@ When the evaluator asks: *"Can you show us a live demonstration?"*
 
 ### Q5: *"How is the application deployed and tested?"*
 > **Answer:** *"We validated the entire pipeline with 200 automated pytest tests covering prenatal calculations, all four models, database transactions, streaming SSE, and security. It is deployed as a dual-mode application: a production container via Docker Compose (FastAPI + MySQL) and a live interactive showcase on GitHub Pages with CI/CD via GitHub Actions."*
+
