@@ -1,6 +1,4 @@
-import re
-
-code = '''// NeoNatal Watch AI — Doctor-First Clinical Analytics Dashboard
+// NeoNatal Watch AI — Doctor-First Clinical Analytics Dashboard
 // High-Contrast, Eye-Comfort, Clinical Analytics Interface
 
 const { useState, useEffect, useRef, useMemo } = React;
@@ -565,11 +563,7 @@ function UploadReportModal({ isOpen, onClose, patients, onReportUploaded, initia
         </div>
     );
 }
-'''
 
-print("Code template part 1 written.")
-with open("scripts/part1.py", "w", encoding="utf-8") as f:
-    f.write(code)
 
 
 const PATIENT_AVATARS = {
