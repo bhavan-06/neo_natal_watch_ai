@@ -580,6 +580,27 @@ const PATIENT_AVATARS = {
 };
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80';
 
+const MEDICAL_IMAGES = {
+    wardBanner: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1400&q=80',
+    loginBg: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1600&q=80',
+    incubators: {
+        'P-SYN-002': 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80',
+        'P-SYN-003': 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80',
+        'P-SYN-005': 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=600&q=80',
+        'P-SYN-007': 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=600&q=80',
+        'P-SYN-008': 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80',
+        'default': 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80'
+    },
+    ultrasounds: {
+        'P-SYN-001': 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=600&q=80',
+        'P-SYN-004': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=600&q=80',
+        'P-SYN-006': 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80',
+        'P-SYN-009': 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=600&q=80',
+        'P-SYN-010': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=600&q=80',
+        'default': 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=600&q=80'
+    }
+};
+
 // ─── Format Helpers ───────────────────────────────────────────────────────────
 const fmt = { 
     date: d => d ? new Date(d).toLocaleDateString('en-US', { day:'2-digit', month:'short', year:'numeric' }) : '—',
@@ -947,7 +968,7 @@ function PatientDetailDrawer({ patientId, onClose, userRole, isDark, onDownloadR
     return (
         <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/70 flex justify-end z-50 backdrop-blur-sm" onClick={onClose}>
             <div
-                className="w-full max-w-4xl bg-white dark:bg-[#0f1729] text-slate-900 dark:text-slate-100 h-full overflow-hidden flex flex-col shadow-2xl border-l border-slate-300 dark:border-slate-800"
+                className="w-full max-w-4xl bg-white dark:bg-[#0f1729] text-slate-900 dark:text-slate-100 h-full overflow-hidden flex flex-col shadow-2xl border-l border-slate-300 dark:border-slate-800 animate-slide-right"
                 onClick={e => e.stopPropagation()}
             >
                 {loading ? (
@@ -1117,6 +1138,48 @@ function PatientDetailDrawer({ patientId, onClose, userRole, isDark, onDownloadR
                             {/* TAB 3: PREGNANCY & GROWTH */}
                             {activeTab === 'pregnancy' && (
                                 <div className="space-y-6">
+                                    {/* Ultrasound Biometry Imaging Gallery */}
+                                    <div className="card overflow-hidden rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                                        <div className="p-4 sm:p-5 pb-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2">
+                                            <div>
+                                                <h3 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                                                    <i className="fa-solid fa-camera text-sky-500"></i>
+                                                    Diagnostic Ultrasound & Biometrics Survey
+                                                </h3>
+                                                <p className="text-xs text-slate-500">High-resolution transabdominal sonography scans with automated caliper biometry</p>
+                                            </div>
+                                            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 shadow-sm">
+                                                Sonogram Calipers Active
+                                            </span>
+                                        </div>
+
+                                        <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 group shadow-md">
+                                                <img src={MEDICAL_IMAGES.ultrasounds[patientId] || MEDICAL_IMAGES.ultrasounds['default']} alt="Fetal Ultrasound" className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"></div>
+                                                <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/60 text-[10px] font-mono font-bold text-sky-300 border border-white/20 backdrop-blur-sm">
+                                                    Transabdominal BPD/HC
+                                                </div>
+                                                <div className="absolute bottom-2.5 left-3 right-3 text-xs text-white">
+                                                    <div className="font-extrabold">Anatomical Caliper Biometry</div>
+                                                    <div className="text-[11px] text-slate-300 font-mono">BPD: 84.2 mm · HC: 312.4 mm · AC: 304.1 mm</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 group shadow-md">
+                                                <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=600&q=80" alt="Doppler Ultrasound" className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"></div>
+                                                <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/60 text-[10px] font-mono font-bold text-teal-300 border border-white/20 backdrop-blur-sm">
+                                                    Color Doppler Velocimetry
+                                                </div>
+                                                <div className="absolute bottom-2.5 left-3 right-3 text-xs text-white">
+                                                    <div className="font-extrabold">Uterine & Umbilical Waveform</div>
+                                                    <div className="text-[11px] text-slate-300 font-mono">PI: 0.92 · RI: 0.58 · End-Diastolic Flow Present</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* Predicted vs Actual Fetal Growth */}
                                     {growth.length > 0 && (
                                         <div className="card p-5">
@@ -1232,6 +1295,32 @@ function PatientDetailDrawer({ patientId, onClose, userRole, isDark, onDownloadR
                                         <EmptyState icon="fa-hospital" title="No active NICU admission" description="This patient is currently monitored in the antenatal or outpatient ward." />
                                     ) : (
                                         <>
+                                            {/* Incubator Bedside Pod Display */}
+                                            <div className="card overflow-hidden rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                                                <div className="relative h-44 overflow-hidden">
+                                                    <img src={MEDICAL_IMAGES.incubators[patientId] || MEDICAL_IMAGES.incubators['default']} alt="Incubator Pod" className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
+                                                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-extrabold bg-slate-900/80 text-white backdrop-blur-md border border-white/20">
+                                                        <i className="fa-solid fa-bed text-sky-400 mr-1.5"></i>
+                                                        {patient?.bed || 'NICU Incubator Pod Station'}
+                                                    </div>
+                                                    <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white flex-wrap gap-2">
+                                                        <div>
+                                                            <span className="text-[10px] font-mono text-sky-300 block uppercase tracking-wider">NICU Servo Pod Station</span>
+                                                            <span className="text-base font-extrabold">{newborns[0]?.name || newborns[0]?.newborn_code || 'Baby Patient'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-white/10 backdrop-blur-md border border-white/20">
+                                                                Ventilator: CPAP 5 cmH2O
+                                                            </span>
+                                                            <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-white/10 backdrop-blur-md border border-white/20">
+                                                                FiO2: 21%
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div className="card p-5">
                                                 <SectionHeader title="NICU Telemetry Dossier" subtitle="Continuous incubator surveillance" />
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
@@ -1479,89 +1568,105 @@ function PriorityPatientsTable({ patients, onSelect, onDownloadReport, onOpenUpl
     }).sort((a, b) => b.simRisk - a.simRisk), [patients]);
 
     return (
-        <div className="card overflow-hidden shadow-sm">
+        <div className="card overflow-hidden shadow-lg border border-slate-200/80 dark:border-slate-800 rounded-2xl animate-fade-in">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
-                        <tr className="bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
-                            <th className="px-5 py-3.5 text-left">Patient Name</th>
-                            <th className="px-5 py-3.5 text-left">Record ID</th>
-                            <th className="px-5 py-3.5 text-left">Care Stage</th>
-                            <th className="px-5 py-3.5 text-left">Real-Time Telemetry</th>
-                            <th className="px-5 py-3.5 text-left">Status Indicator</th>
-                            <th className="px-5 py-3.5 text-left">Triage Priority</th>
-                            <th className="px-5 py-3.5 text-right">Actions</th>
+                        <tr className="bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-850 dark:to-slate-800 text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700/80">
+                            <th className="px-5 py-4 text-left">Patient & Location</th>
+                            <th className="px-5 py-4 text-left">Record ID</th>
+                            <th className="px-5 py-4 text-left">Care Stage</th>
+                            <th className="px-5 py-4 text-left">Real-Time Telemetry</th>
+                            <th className="px-5 py-4 text-left">Clinical Risk</th>
+                            <th className="px-5 py-4 text-left">Triage Status</th>
+                            <th className="px-5 py-4 text-right">Quick Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/50">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 bg-white dark:bg-slate-900/60">
                         {prioritized.map(p => {
                             const r = riskLevel(p.simRisk);
                             const avatar = PATIENT_AVATARS[p.id] || DEFAULT_AVATAR;
                             const lv = liveVitalsMap[p.id] || { heart_rate: 138, spo2: 97, respiratory_rate: 42, temperature: 36.9 };
                             const isCrit = ['P-SYN-002', 'P-SYN-005', 'P-SYN-008'].includes(p.id);
                             return (
-                                <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer" onClick={() => onSelect(p.id)}>
+                                <tr key={p.id}
+                                    className={`transition-all duration-200 cursor-pointer ${isCrit ? 'bg-rose-50/30 dark:bg-rose-950/20 hover:bg-rose-50/60 dark:hover:bg-rose-950/40' : 'hover:bg-sky-50/40 dark:hover:bg-slate-800/60'}`}
+                                    onClick={() => onSelect(p.id)}>
                                     <td className="px-5 py-3.5">
                                         <div className="flex items-center gap-3">
-                                            <img src={avatar} alt={p.name} className="w-9 h-9 rounded-full object-cover border border-slate-300 dark:border-slate-700 shadow-sm flex-shrink-0" />
+                                            <div className="relative">
+                                                <img src={avatar} alt={p.name} className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shadow-sm flex-shrink-0" />
+                                                {isCrit && (
+                                                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-white"></span>
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div>
-                                                <span className="font-bold text-slate-900 dark:text-white block text-sm">{p.name || p.id}</span>
-                                                <span className="text-xs text-slate-500 font-mono">{p.bed || p.id}</span>
+                                                <span className="font-extrabold text-slate-900 dark:text-white block text-sm tracking-tight">{p.name || p.id}</span>
+                                                <span className="text-xs text-slate-500 font-semibold flex items-center gap-1">
+                                                    <i className="fa-solid fa-hospital-user text-[11px] text-sky-500"></i>
+                                                    <span>{p.bed || p.id}</span>
+                                                </span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-5 py-3.5 font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">{p.id}</td>
+                                    <td className="px-5 py-3.5 font-mono text-xs font-bold text-slate-600 dark:text-slate-400">{p.id}</td>
                                     <td className="px-5 py-3.5">
-                                        <span className={`px-2.5 py-0.5 rounded text-xs font-bold ${p.stage === 'NICU' ? 'bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800' : 'bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800'}`}>
+                                        <span className={`px-2.5 py-1 rounded-md text-xs font-extrabold shadow-sm ${p.stage === 'NICU' ? 'bg-gradient-to-r from-rose-500/10 to-amber-500/10 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800' : 'bg-gradient-to-r from-sky-500/10 to-teal-500/10 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-800'}`}>
                                             {p.stage}
                                         </span>
                                     </td>
                                     <td className="px-5 py-3.5">
                                         <div className="flex items-center gap-2">
-                                            <span className={`px-2 py-0.5 rounded font-mono font-bold text-xs inline-flex items-center gap-1 ${lv.heart_rate > 160 ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200'}`}>
+                                            <span className={`px-2.5 py-1 rounded-lg font-mono font-bold text-xs inline-flex items-center gap-1.5 shadow-sm ${lv.heart_rate > 160 ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700'}`}>
                                                 <i className={`fa-solid fa-heart-pulse text-xs ${lv.heart_rate > 160 ? 'text-rose-600 animate-pulse' : 'text-rose-500'}`}></i>
-                                                {lv.heart_rate} bpm
+                                                <span>{lv.heart_rate} bpm</span>
                                             </span>
-                                            <span className={`px-2 py-0.5 rounded font-mono font-bold text-xs inline-flex items-center gap-1 ${lv.spo2 < 93 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300' : 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300'}`}>
+                                            <span className={`px-2.5 py-1 rounded-lg font-mono font-bold text-xs inline-flex items-center gap-1.5 shadow-sm ${lv.spo2 < 93 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800' : 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800'}`}>
                                                 <i className="fa-solid fa-lungs text-xs text-sky-500"></i>
-                                                {lv.spo2}%
+                                                <span>{lv.spo2}%</span>
                                             </span>
                                         </div>
                                     </td>
                                     <td className="px-5 py-3.5">
                                         <div className="flex items-center gap-2">
-                                            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: r.dot }}></span>
-                                            <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{r.label}</span>
+                                            <span className="w-2.5 h-2.5 rounded-full inline-block shadow-sm" style={{ backgroundColor: r.dot }}></span>
+                                            <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{r.label}</span>
                                         </div>
                                     </td>
                                     <td className="px-5 py-3.5">
                                         {p.needsReview ? (
-                                            <span className="status-high px-2.5 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1">
-                                                <i className="fa-solid fa-triangle-exclamation text-xs"></i>
+                                            <span className="status-high px-2.5 py-1 rounded-full text-xs font-extrabold inline-flex items-center gap-1 shadow-sm">
+                                                <i className="fa-solid fa-triangle-exclamation text-xs animate-bounce"></i>
                                                 Review Required
                                             </span>
                                         ) : (
-                                            <span className="text-xs font-semibold text-slate-500">Routine Surveillance</span>
+                                            <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                                                <i className="fa-solid fa-check text-emerald-500 text-xs"></i>
+                                                Routine Surveillance
+                                            </span>
                                         )}
                                     </td>
                                     <td className="px-5 py-3.5 text-right whitespace-nowrap">
                                         <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
                                             <button onClick={() => onDownloadReport(p.id, lv)}
-                                                className="px-2.5 py-1 rounded bg-emerald-50 dark:bg-emerald-950/80 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                                                className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
                                                 title="Download Patient Clinical Evaluation Report">
-                                                <i className="fa-solid fa-file-arrow-down text-emerald-600"></i>
+                                                <i className="fa-solid fa-file-arrow-down"></i>
                                                 <span>Report</span>
                                             </button>
                                             <button onClick={() => onOpenUpload(p.id)}
-                                                className="px-2.5 py-1 rounded bg-sky-50 dark:bg-sky-950/80 hover:bg-sky-100 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-800 text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                                                className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-extrabold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-md shadow-sky-600/20"
                                                 title="Upload Clinical Document for this Patient">
-                                                <i className="fa-solid fa-cloud-arrow-up text-sky-600"></i>
+                                                <i className="fa-solid fa-cloud-arrow-up"></i>
                                                 <span>Upload</span>
                                             </button>
                                             <button onClick={() => onSelect(p.id)}
-                                                className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1">
+                                                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-extrabold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1 border border-slate-200 dark:border-slate-700 shadow-sm">
                                                 <span>Dossier</span>
-                                                <i className="fa-solid fa-chevron-right text-[10px]"></i>
+                                                <i className="fa-solid fa-arrow-right text-[10px] text-sky-500"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -1592,39 +1697,116 @@ function DashboardPage({ stats, patients, onSelectPatient, onDownloadReport, onO
     const reviewPatients = useMemo(() => patients.filter(p => ['P-SYN-002','P-SYN-005','P-SYN-008'].includes(p.id)), [patients]);
 
     return (
-        <div className="space-y-6">
-            {/* Top 4 Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="space-y-6 animate-fade-in">
+            {/* Ward Command Center Hero Banner */}
+            <div className="relative overflow-hidden rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 text-white"
+                style={{
+                    background: `linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 33, 64, 0.90) 50%, rgba(15, 23, 42, 0.96) 100%), url('${MEDICAL_IMAGES.wardBanner}') center/cover no-repeat`
+                }}>
+                <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute -left-10 -top-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div className="relative p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 z-10">
+                    <div className="space-y-2 max-w-2xl">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-gradient-to-r from-sky-500/30 to-teal-500/30 text-sky-200 border border-sky-400/40 flex items-center gap-2 shadow-sm backdrop-blur-md">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                                </span>
+                                Continuous 100Hz Telemetry Stream Active
+                            </span>
+                            <span className="text-xs text-slate-300 font-semibold flex items-center gap-1">
+                                <i className="fa-solid fa-clock text-sky-400"></i>
+                                Shift: Attending Neonatologist On-Duty
+                            </span>
+                        </div>
+
+                        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                            Maternal-Fetal & NICU Surveillance Pod
+                        </h1>
+                        <p className="text-sm text-slate-300 font-medium leading-relaxed">
+                            Continuous multi-modal vital signs monitoring, AI longitudinal fetal biometrics analysis, and real-time hemodynamic deterioration alerts.
+                        </p>
+                    </div>
+
+                    {/* Live ECG Rhythm Box & Quick Actions */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                        <div className="glass-panel p-3.5 rounded-2xl bg-white/10 border border-white/20 flex items-center gap-3 backdrop-blur-md">
+                            <div className="text-left">
+                                <div className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Ward Pulse Rhythm</div>
+                                <div className="text-xs font-mono font-bold text-emerald-300 flex items-center gap-1">
+                                    <i className="fa-solid fa-heart-pulse text-rose-400 animate-pulse"></i>
+                                    Normal Sinus
+                                </div>
+                            </div>
+                            <svg className="w-24 h-7 text-emerald-400" viewBox="0 0 100 25" fill="none">
+                                <polyline
+                                    className="ecg-line"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    points="0,12 20,12 25,12 30,3 35,22 40,8 45,15 50,12 70,12 75,3 80,22 85,12 100,12"
+                                />
+                            </svg>
+                        </div>
+
+                        <button onClick={() => onOpenUpload()}
+                            className="px-4 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-400 hover:to-teal-400 text-white text-xs font-extrabold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25">
+                            <i className="fa-solid fa-cloud-arrow-up text-sm"></i>
+                            <span>Upload Report</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Top 4 Radiant KPI Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: 'Total Patients', value: stats.total_patients, desc: 'Active continuous surveillance', icon: 'fa-users', color: 'text-slate-600 dark:text-slate-400', filter: 'ALL', border: 'border-t-4 border-t-slate-500' },
-                    { label: 'Antenatal Profiles', value: stats.active_pregnancies, desc: 'Fetal growth & Doppler protocol', icon: 'fa-person-pregnant', color: 'text-sky-600 dark:text-sky-400', filter: 'PRENATAL', border: 'border-t-4 border-t-sky-500' },
-                    { label: 'NICU Incubators', value: stats.nicu_admissions, desc: 'Real-time multi-vital streaming', icon: 'fa-hospital', color: 'text-emerald-600 dark:text-emerald-400', filter: 'NICU', border: 'border-t-4 border-t-emerald-500' },
-                    { label: 'Requiring Action', value: stats.active_alerts, desc: 'AI threshold flags active', icon: 'fa-triangle-exclamation', color: 'text-rose-600 dark:text-rose-400', filter: 'REVIEW', border: 'border-t-4 border-t-rose-500' },
+                    { label: 'Total Patients', value: stats.total_patients, desc: 'Active continuous surveillance', icon: 'fa-users', gradient: 'from-blue-600 to-indigo-600', filter: 'ALL', border: 'border-t-4 border-t-indigo-500' },
+                    { label: 'Antenatal Profiles', value: stats.active_pregnancies, desc: 'Fetal growth & Doppler protocol', icon: 'fa-person-pregnant', gradient: 'from-sky-500 to-cyan-500', filter: 'PRENATAL', border: 'border-t-4 border-t-sky-500' },
+                    { label: 'NICU Incubators', value: stats.nicu_admissions, desc: 'Continuous multi-vital telemetry', icon: 'fa-hospital', gradient: 'from-teal-500 to-emerald-500', filter: 'NICU', border: 'border-t-4 border-t-emerald-500' },
+                    { label: 'Requiring Action', value: stats.active_alerts, desc: 'Multi-modal risk threshold flags', icon: 'fa-triangle-exclamation', gradient: 'from-rose-500 to-red-600', filter: 'REVIEW', border: 'border-t-4 border-t-rose-500', isCrit: true },
                 ].map((c, i) => (
                     <button key={i} onClick={() => setFilter(c.filter)}
-                        className={`card p-5 text-left transition hover:shadow-md ${c.border} ${filter === c.filter ? 'ring-2 ring-sky-600' : ''}`}>
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{c.label}</span>
-                            <i className={`fa-solid ${c.icon} ${c.color} text-base`}></i>
+                        className={`card card-interactive p-5 text-left rounded-2xl ${c.border} ${filter === c.filter ? 'ring-2 ring-sky-500 shadow-lg' : ''} ${c.isCrit && c.value > 0 ? 'glow-rose' : ''}`}>
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{c.label}</span>
+                            <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${c.gradient} text-white flex items-center justify-center text-sm shadow-md`}>
+                                <i className={`fa-solid ${c.icon}`}></i>
+                            </div>
                         </div>
-                        <div className="text-3xl font-extrabold text-slate-900 dark:text-white mb-1 font-mono">{c.value}</div>
-                        <p className="text-xs font-medium text-slate-600 dark:text-slate-400">{c.desc}</p>
+                        <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1.5 font-mono tracking-tight">{c.value}</div>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{c.desc}</p>
+                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div className={`h-full bg-gradient-to-r ${c.gradient} rounded-full`} style={{ width: `${Math.min(100, (c.value / 10) * 100)}%` }}></div>
+                        </div>
                     </button>
                 ))}
             </div>
 
             {/* Patients Requiring Review */}
             {reviewPatients.length > 0 && (
-                <div>
-                    <SectionHeader
-                        title="High Priority Patient Surveillance"
-                        subtitle="These cases have triggered multi-modal risk thresholds. Immediate clinician review is advised."
-                        action={
-                            <div className="flex items-center gap-2">
-                                <span className="status-high px-3 py-1 rounded-full text-xs font-bold">{reviewPatients.length} Active Flags</span>
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                            <span className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                            </span>
+                            <div>
+                                <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">High Priority Patient Surveillance</h2>
+                                <p className="text-xs text-slate-500">These cases have exceeded multi-modal risk thresholds. Immediate clinician review advised.</p>
                             </div>
-                        }
-                    />
+                        </div>
+                        <span className="status-high px-3 py-1 rounded-full text-xs font-extrabold shadow-sm flex items-center gap-1.5">
+                            <i className="fa-solid fa-triangle-exclamation"></i>
+                            <span>{reviewPatients.length} Active Urgent Flags</span>
+                        </span>
+                    </div>
+
                     <PriorityPatientsTable
                         patients={reviewPatients}
                         onSelect={onSelectPatient}
@@ -1635,32 +1817,41 @@ function DashboardPage({ stats, patients, onSelectPatient, onDownloadReport, onO
                 </div>
             )}
 
-            {/* All Monitored Patients */}
-            <div>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-                    <SectionHeader title="Active Patient Directory" subtitle={`${filtered.length} patients currently under surveillance`} />
-                    <div className="flex items-center gap-2 flex-wrap">
-                        {[['ALL', 'All Cases'], ['NICU', 'NICU'], ['PRENATAL', 'Antenatal'], ['REVIEW', 'High Risk']].map(([v, l]) => (
-                            <button key={v} onClick={() => setFilter(v)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${filter === v ? 'bg-sky-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-50'}`}>
-                                {l}
-                            </button>
-                        ))}
-                        <button onClick={() => onOpenUpload()}
-                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm">
-                            <i className="fa-solid fa-cloud-arrow-up"></i>
-                            <span>Upload Report</span>
-                        </button>
-                        <div className="relative">
+            {/* All Monitored Patients Directory */}
+            <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                        <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Active Patient Directory</h2>
+                        <p className="text-xs text-slate-500">{filtered.length} patients currently under surveillance</p>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+                        <div className="flex items-center p-1 bg-slate-200/80 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700">
+                            {[
+                                ['ALL', 'All Cases', 'fa-hospital-user'],
+                                ['NICU', 'NICU Pods', 'fa-hospital'],
+                                ['PRENATAL', 'Antenatal', 'fa-person-pregnant'],
+                                ['REVIEW', 'Critical', 'fa-triangle-exclamation']
+                            ].map(([v, l, ic]) => (
+                                <button key={v} onClick={() => setFilter(v)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all duration-200 flex items-center gap-1.5 ${filter === v ? 'bg-gradient-to-r from-sky-600 to-teal-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
+                                    <i className={`fa-solid ${ic} text-[10px]`}></i>
+                                    <span>{l}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="relative flex-1 sm:flex-initial">
                             <input
                                 value={search} onChange={e => setSearch(e.target.value)}
                                 placeholder="Search by name, ID or bed..."
-                                className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-500 outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600 font-medium w-52 shadow-sm"
+                                className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 font-semibold w-full sm:w-56 shadow-sm transition"
                             />
-                            <i className="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                            <i className="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
                         </div>
                     </div>
                 </div>
+
                 <PriorityPatientsTable
                     patients={filtered}
                     onSelect={onSelectPatient}
@@ -1673,8 +1864,8 @@ function DashboardPage({ stats, patients, onSelectPatient, onDownloadReport, onO
             {/* Ward AI Assistant (Collapsible) */}
             <div className="pt-2">
                 <button onClick={() => setShowChat(!showChat)}
-                    className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-sky-600 transition mb-3">
-                    <i className={`fa-solid fa-chevron-${showChat ? 'down' : 'right'} text-xs`}></i>
+                    className="flex items-center gap-2 text-sm font-extrabold text-slate-700 dark:text-slate-300 hover:text-sky-600 transition mb-3">
+                    <i className={`fa-solid fa-chevron-${showChat ? 'down' : 'right'} text-xs text-sky-500`}></i>
                     <i className="fa-solid fa-robot text-sky-600 dark:text-sky-400"></i>
                     <span>Clinical AI Ward Consultant</span>
                     <span className="text-xs font-normal text-slate-500">(click to expand)</span>
@@ -1689,43 +1880,102 @@ function DashboardPage({ stats, patients, onSelectPatient, onDownloadReport, onO
 function AlertsPage({ patients, onSelectPatient, onDownloadReport, onOpenUpload, liveVitalsMap }) {
     const criticalPatients = patients.filter(p => ['P-SYN-002','P-SYN-005','P-SYN-008'].includes(p.id));
     return (
-        <div className="space-y-5">
-            <SectionHeader title="Clinical Alert Center" subtitle="Real-time multi-modal threshold notifications and priority flags." />
+        <div className="space-y-6 animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                        </span>
+                        <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Clinical Alert Center</h1>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">Real-time multi-modal threshold notifications and urgent priority surveillance flags.</p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <span className="status-high px-3 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+                        <i className="fa-solid fa-triangle-exclamation animate-bounce"></i>
+                        <span>{criticalPatients.length} Active Urgent Flags</span>
+                    </span>
+                </div>
+            </div>
+
             {criticalPatients.length === 0 ? (
                 <EmptyState icon="fa-bell-slash" title="No active clinical alerts" description="All monitored patients are operating within expected baseline parameters." />
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {criticalPatients.map(p => {
                         const avatar = PATIENT_AVATARS[p.id] || DEFAULT_AVATAR;
-                        const lv = liveVitalsMap[p.id] || { heart_rate: 168, spo2: 91 };
+                        const lv = liveVitalsMap[p.id] || { heart_rate: 168, spo2: 91, respiratory_rate: 62, temperature: 37.8 };
+                        const isCrit = true;
                         return (
-                            <div key={p.id} className="card p-5 border-l-4 border-l-rose-600 hover:shadow-md transition">
-                                <div className="flex items-start justify-between flex-wrap gap-4">
-                                    <div className="flex items-center gap-4">
-                                        <img src={avatar} alt={p.name} className="w-12 h-12 rounded-full object-cover border border-slate-300 dark:border-slate-700 shadow-sm" />
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="status-high px-2.5 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1">
-                                                    <i className="fa-solid fa-triangle-exclamation"></i> High Priority Review Flag
+                            <div key={p.id} className="card card-interactive p-6 rounded-2xl border-l-4 border-l-rose-500 shadow-xl bg-gradient-to-r from-rose-50/20 via-white to-white dark:from-rose-950/20 dark:via-slate-900 dark:to-slate-900 glow-rose">
+                                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+                                    <div className="flex items-start sm:items-center gap-4">
+                                        <div className="relative flex-shrink-0">
+                                            <img src={avatar} alt={p.name} className="w-14 h-14 rounded-2xl object-cover border-2 border-rose-300 dark:border-rose-800 shadow-md" />
+                                            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-600 border-2 border-white dark:border-slate-900"></span>
+                                            </span>
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="status-high px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center gap-1 shadow-sm">
+                                                    <i className="fa-solid fa-triangle-exclamation text-xs"></i>
+                                                    CRITICAL DETERIORATION FLAG
                                                 </span>
-                                                <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950 px-2 py-0.5 rounded">
-                                                    HR: {lv.heart_rate} bpm · SpO2: {lv.spo2}%
+                                                <span className="text-xs font-mono font-bold text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-950 px-2.5 py-0.5 rounded-md border border-rose-200 dark:border-rose-900">
+                                                    Risk: 78% Threshold Exceeded
+                                                </span>
+                                                <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                                                    <i className="fa-solid fa-bed text-sky-500 text-xs"></i>
+                                                    {p.bed}
                                                 </span>
                                             </div>
-                                            <h3 className="font-bold text-slate-900 dark:text-white text-base">{p.name || p.id}</h3>
-                                            <p className="text-xs font-mono font-semibold text-slate-500 mt-0.5">ID: {p.id} · Level IV NICU Telemetry</p>
-                                            <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">Multi-modal deterioration probability &gt; 70% threshold</p>
+
+                                            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{p.name || p.id}</h3>
+                                            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                                                Sustained hemodynamic instability, tachycardia & oxygen desaturation requiring attending clinician review.
+                                            </p>
+
+                                            <div className="flex items-center gap-2.5 pt-1 flex-wrap">
+                                                <span className="px-2.5 py-1 rounded-lg font-mono font-extrabold text-xs inline-flex items-center gap-1.5 bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800 shadow-sm">
+                                                    <i className="fa-solid fa-heart-pulse text-rose-600 animate-pulse"></i>
+                                                    HR: {lv.heart_rate} bpm
+                                                </span>
+                                                <span className="px-2.5 py-1 rounded-lg font-mono font-extrabold text-xs inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 shadow-sm">
+                                                    <i className="fa-solid fa-lungs text-amber-600"></i>
+                                                    SpO2: {lv.spo2}%
+                                                </span>
+                                                <span className="px-2.5 py-1 rounded-lg font-mono font-extrabold text-xs inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                    <i className="fa-solid fa-thermometer-half text-amber-500"></i>
+                                                    {lv.temperature || 37.8}°C
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
+
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-2 w-full lg:w-auto justify-end flex-wrap pt-2 lg:pt-0">
                                         <button onClick={() => onDownloadReport(p.id, lv)}
-                                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm flex items-center gap-1.5">
+                                            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-md shadow-emerald-600/20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5">
                                             <i className="fa-solid fa-file-arrow-down"></i>
                                             <span>Download Report</span>
                                         </button>
+
+                                        <button onClick={() => onOpenUpload(p.id)}
+                                            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-black shadow-md shadow-sky-600/20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5">
+                                            <i className="fa-solid fa-cloud-arrow-up"></i>
+                                            <span>Upload Doc</span>
+                                        </button>
+
                                         <button onClick={() => onSelectPatient(p.id)}
-                                            className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">
-                                            Open Dossier →
+                                            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-black shadow-md transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5">
+                                            <span>Open Dossier</span>
+                                            <i className="fa-solid fa-arrow-right text-[10px]"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -1738,36 +1988,351 @@ function AlertsPage({ patients, onSelectPatient, onDownloadReport, onOpenUpload,
     );
 }
 
-// ─── NICU Page ────────────────────────────────────────────────────────────────
+// ─── NICU Page (Visual Pod Gallery & Telemetry) ─────────────────────────────────
 function NicuPage({ patients, onSelectPatient, onDownloadReport, onOpenUpload, liveVitalsMap }) {
-    const nicuPatients = patients.filter(p => ['P-SYN-002','P-SYN-003','P-SYN-005','P-SYN-007','P-SYN-008'].includes(p.id));
+    const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table'
+    const nicuPatients = useMemo(() => patients.filter(p => ['P-SYN-002','P-SYN-003','P-SYN-005','P-SYN-007','P-SYN-008'].includes(p.id)), [patients]);
+
     return (
-        <div className="space-y-5">
-            <SectionHeader title="NICU Continuous Telemetry Surveillance" subtitle={`${nicuPatients.length} incubators under continuous hemodynamic & respiratory monitoring`} />
-            <PriorityPatientsTable
-                patients={nicuPatients}
-                onSelect={onSelectPatient}
-                onDownloadReport={onDownloadReport}
-                onOpenUpload={onOpenUpload}
-                liveVitalsMap={liveVitalsMap}
-            />
+        <div className="space-y-6 animate-fade-in">
+            {/* NICU Hero Banner */}
+            <div className="relative overflow-hidden rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 text-white"
+                style={{
+                    background: `linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(6, 78, 59, 0.85) 60%, rgba(15, 23, 42, 0.96) 100%), url('${MEDICAL_IMAGES.wardBanner}') center/cover no-repeat`
+                }}>
+                <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="space-y-2 max-w-2xl">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-2 backdrop-blur-md">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Level III/IV NICU Telemetry Station Active
+                            </span>
+                            <span className="text-xs text-slate-300 font-semibold">Continuous Multi-Vital Oscillometry</span>
+                        </div>
+                        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                            Neonatal Intensive Care Pods
+                        </h1>
+                        <p className="text-sm text-slate-300 font-medium">
+                            Real-time streaming telemetry across {nicuPatients.length} neonatal incubator pods with continuous heart rate, SpO2, and thermo-surveillance.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-slate-900/60 p-1.5 rounded-2xl border border-white/20 backdrop-blur-md">
+                        <button onClick={() => setViewMode('cards')}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${viewMode === 'cards' ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-md' : 'text-slate-300 hover:text-white'}`}>
+                            <i className="fa-solid fa-table-cells-large"></i>
+                            <span>Pod Gallery</span>
+                        </button>
+                        <button onClick={() => setViewMode('table')}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${viewMode === 'table' ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-md' : 'text-slate-300 hover:text-white'}`}>
+                            <i className="fa-solid fa-list-check"></i>
+                            <span>Data Table</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* View Mode Switch */}
+            {viewMode === 'cards' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {nicuPatients.map(p => {
+                        const avatar = PATIENT_AVATARS[p.id] || DEFAULT_AVATAR;
+                        const incImg = MEDICAL_IMAGES.incubators[p.id] || MEDICAL_IMAGES.incubators['default'];
+                        const lv = liveVitalsMap[p.id] || { heart_rate: 138, spo2: 97, respiratory_rate: 42, temperature: 36.9 };
+                        const isCrit = ['P-SYN-002', 'P-SYN-005', 'P-SYN-008'].includes(p.id);
+
+                        return (
+                            <div key={p.id} className={`card card-interactive overflow-hidden rounded-3xl shadow-lg border border-slate-200/80 dark:border-slate-800 transition-all duration-300 ${isCrit ? 'glow-rose border-rose-500/50' : 'hover:border-teal-400'}`}>
+                                {/* Incubator Visual Header */}
+                                <div className="relative h-44 overflow-hidden">
+                                    <img src={incImg} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
+
+                                    {/* Top Bar on Image */}
+                                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                                        <span className="px-3 py-1 rounded-full text-xs font-black bg-slate-900/80 text-white backdrop-blur-md border border-white/20 shadow-md flex items-center gap-1.5">
+                                            <i className="fa-solid fa-bed text-sky-400 text-xs"></i>
+                                            <span>{p.bed}</span>
+                                        </span>
+
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-black backdrop-blur-md shadow-md flex items-center gap-1.5 ${isCrit ? 'bg-rose-600/90 text-white animate-pulse' : 'bg-emerald-600/90 text-white'}`}>
+                                            <span className="w-2 h-2 rounded-full bg-white"></span>
+                                            <span>{isCrit ? 'Review Needed' : 'Stable'}</span>
+                                        </span>
+                                    </div>
+
+                                    {/* Patient Info on Image Footer */}
+                                    <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3">
+                                        <img src={avatar} alt={p.name} className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0" />
+                                        <div className="truncate">
+                                            <h3 className="font-black text-white text-base tracking-tight truncate drop-shadow-sm">{p.name}</h3>
+                                            <p className="text-xs text-sky-200 font-mono font-bold">Record ID: {p.id}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Live Telemetry Stream Block */}
+                                <div className="p-5 space-y-4">
+                                    {/* Mini Oscilloscope Rhythm Wave */}
+                                    <div className="p-2.5 rounded-xl bg-slate-900 dark:bg-slate-950 border border-slate-800 flex items-center justify-between text-xs font-mono">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                            <span className="text-[11px] font-bold text-emerald-400">ECG Lead II</span>
+                                        </div>
+                                        <svg className="w-28 h-5 text-emerald-400" viewBox="0 0 100 20" fill="none">
+                                            <polyline
+                                                className="ecg-line"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                points="0,10 20,10 25,10 30,2 35,18 40,6 45,12 50,10 70,10 75,2 80,18 85,10 100,10"
+                                            />
+                                        </svg>
+                                        <span className="text-[10px] font-bold text-slate-400">{lv.heart_rate} bpm</span>
+                                    </div>
+
+                                    {/* Live Vitals Grid */}
+                                    <div className="grid grid-cols-2 gap-2.5">
+                                        <div className={`p-2.5 rounded-xl border ${lv.heart_rate > 160 ? 'bg-rose-50/60 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800' : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'}`}>
+                                            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                                <span>Heart Rate</span>
+                                                <i className={`fa-solid fa-heart-pulse ${lv.heart_rate > 160 ? 'text-rose-500 animate-pulse' : 'text-rose-400'}`}></i>
+                                            </div>
+                                            <div className="text-xl font-black font-mono text-slate-900 dark:text-white mt-0.5">
+                                                {lv.heart_rate} <span className="text-xs font-semibold text-slate-400">bpm</span>
+                                            </div>
+                                        </div>
+
+                                        <div className={`p-2.5 rounded-xl border ${lv.spo2 < 93 ? 'bg-amber-50/60 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800' : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'}`}>
+                                            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                                <span>SpO2 Oxygen</span>
+                                                <i className="fa-solid fa-lungs text-sky-500"></i>
+                                            </div>
+                                            <div className="text-xl font-black font-mono text-slate-900 dark:text-white mt-0.5">
+                                                {lv.spo2} <span className="text-xs font-semibold text-slate-400">%</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                                            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                                <span>Incubator Temp</span>
+                                                <i className="fa-solid fa-thermometer-half text-amber-500"></i>
+                                            </div>
+                                            <div className="text-xl font-black font-mono text-slate-900 dark:text-white mt-0.5">
+                                                {lv.temperature || 36.9} <span className="text-xs font-semibold text-slate-400">°C</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                                            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                                <span>Respiration</span>
+                                                <i className="fa-solid fa-gauge text-emerald-500"></i>
+                                            </div>
+                                            <div className="text-xl font-black font-mono text-slate-900 dark:text-white mt-0.5">
+                                                {lv.respiratory_rate || 42} <span className="text-xs font-semibold text-slate-400">/min</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="pt-2 flex items-center gap-2">
+                                        <button onClick={() => onDownloadReport(p.id, lv)}
+                                            className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-1.5"
+                                            title="Download Patient Clinical Evaluation Report">
+                                            <i className="fa-solid fa-file-arrow-down"></i>
+                                            <span>Report</span>
+                                        </button>
+
+                                        <button onClick={() => onOpenUpload(p.id)}
+                                            className="py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-extrabold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-1.5"
+                                            title="Upload Clinical Document for this Patient">
+                                            <i className="fa-solid fa-cloud-arrow-up"></i>
+                                            <span>Upload</span>
+                                        </button>
+
+                                        <button onClick={() => onSelectPatient(p.id)}
+                                            className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-extrabold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-700">
+                                            <span>Dossier</span>
+                                            <i className="fa-solid fa-chevron-right text-[10px] text-sky-500"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <PriorityPatientsTable
+                    patients={nicuPatients}
+                    onSelect={onSelectPatient}
+                    onDownloadReport={onDownloadReport}
+                    onOpenUpload={onOpenUpload}
+                    liveVitalsMap={liveVitalsMap}
+                />
+            )}
         </div>
     );
 }
 
-// ─── Pregnancy Page ───────────────────────────────────────────────────────────
+// ─── Pregnancy Page (Ultrasound & Gestational Suite) ───────────────────────────
 function PregnancyPage({ patients, onSelectPatient, onDownloadReport, onOpenUpload, liveVitalsMap }) {
-    const antenatal = patients.filter(p => ['P-SYN-001','P-SYN-004','P-SYN-006','P-SYN-009','P-SYN-010'].includes(p.id));
+    const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table'
+    const antenatal = useMemo(() => patients.filter(p => ['P-SYN-001','P-SYN-004','P-SYN-006','P-SYN-009','P-SYN-010'].includes(p.id)), [patients]);
+
     return (
-        <div className="space-y-5">
-            <SectionHeader title="Antenatal Longitudinal Surveillance" subtitle={`${antenatal.length} pregnancies under growth & Doppler protocol`} />
-            <PriorityPatientsTable
-                patients={antenatal}
-                onSelect={onSelectPatient}
-                onDownloadReport={onDownloadReport}
-                onOpenUpload={onOpenUpload}
-                liveVitalsMap={liveVitalsMap}
-            />
+        <div className="space-y-6 animate-fade-in">
+            {/* Antenatal Hero Banner */}
+            <div className="relative overflow-hidden rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 text-white"
+                style={{
+                    background: `linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(3, 105, 161, 0.85) 60%, rgba(15, 23, 42, 0.96) 100%), url('${MEDICAL_IMAGES.wardBanner}') center/cover no-repeat`
+                }}>
+                <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="space-y-2 max-w-2xl">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className="px-3 py-1 rounded-full text-xs font-black bg-sky-500/20 text-sky-200 border border-sky-400/30 flex items-center gap-2 backdrop-blur-md">
+                                <i className="fa-solid fa-person-pregnant text-xs"></i>
+                                Antenatal Longitudinal Surveillance Active
+                            </span>
+                            <span className="text-xs text-slate-300 font-semibold">Ultrasound Biometry & Doppler Velocimetry</span>
+                        </div>
+                        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                            Maternal-Fetal Assessment Suite
+                        </h1>
+                        <p className="text-sm text-slate-300 font-medium">
+                            Longitudinal fetal growth trajectories, estimated fetal weight percentiles, and uterine artery Doppler analysis across {antenatal.length} antenatal profiles.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-slate-900/60 p-1.5 rounded-2xl border border-white/20 backdrop-blur-md">
+                        <button onClick={() => setViewMode('cards')}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${viewMode === 'cards' ? 'bg-gradient-to-r from-sky-500 to-teal-500 text-white shadow-md' : 'text-slate-300 hover:text-white'}`}>
+                            <i className="fa-solid fa-id-card"></i>
+                            <span>Biometric Cards</span>
+                        </button>
+                        <button onClick={() => setViewMode('table')}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${viewMode === 'table' ? 'bg-gradient-to-r from-sky-500 to-teal-500 text-white shadow-md' : 'text-slate-300 hover:text-white'}`}>
+                            <i className="fa-solid fa-list-check"></i>
+                            <span>Data Table</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* View Mode Switch */}
+            {viewMode === 'cards' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {antenatal.map((p, idx) => {
+                        const avatar = PATIENT_AVATARS[p.id] || DEFAULT_AVATAR;
+                        const usImg = MEDICAL_IMAGES.ultrasounds[p.id] || MEDICAL_IMAGES.ultrasounds['default'];
+                        const lv = liveVitalsMap[p.id] || { heart_rate: 78, spo2: 99 };
+                        const gaWeeks = (28.4 + (idx * 2.2)).toFixed(1);
+                        const gaPercent = Math.min(100, Math.round((parseFloat(gaWeeks) / 40) * 100));
+
+                        return (
+                            <div key={p.id} className="card card-interactive overflow-hidden rounded-3xl shadow-lg border border-slate-200/80 dark:border-slate-800 transition-all duration-300 hover:border-sky-400">
+                                {/* Ultrasound Scan Visual Header */}
+                                <div className="relative h-44 overflow-hidden">
+                                    <img src={usImg} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
+
+                                    {/* Top Bar on Image */}
+                                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                                        <span className="px-3 py-1 rounded-full text-xs font-black bg-slate-900/80 text-white backdrop-blur-md border border-white/20 shadow-md flex items-center gap-1.5">
+                                            <i className="fa-solid fa-camera text-sky-400 text-xs"></i>
+                                            <span>Sonogram Calipers Active</span>
+                                        </span>
+
+                                        <span className="px-2.5 py-1 rounded-full text-xs font-black bg-sky-600/90 text-white backdrop-blur-md shadow-md flex items-center gap-1">
+                                            <i className="fa-solid fa-calendar-check text-[10px]"></i>
+                                            <span>{gaWeeks} Wks</span>
+                                        </span>
+                                    </div>
+
+                                    {/* Patient Info on Image Footer */}
+                                    <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3">
+                                        <img src={avatar} alt={p.name} className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0" />
+                                        <div className="truncate">
+                                            <h3 className="font-black text-white text-base tracking-tight truncate drop-shadow-sm">{p.name}</h3>
+                                            <p className="text-xs text-sky-200 font-semibold flex items-center gap-1">
+                                                <i className="fa-solid fa-hospital-user text-xs"></i>
+                                                <span>{p.bed} · {p.id}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Gestational Progress & Biometrics Details */}
+                                <div className="p-5 space-y-4">
+                                    {/* Gestational Age Progress Bar */}
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center justify-between text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                                            <span>Gestation: {gaWeeks} / 40 Weeks</span>
+                                            <span className="font-mono text-sky-600 dark:text-sky-400">{gaPercent}% term</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700">
+                                            <div className="h-full bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 rounded-full transition-all duration-500" style={{ width: `${gaPercent}%` }}></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Fetal Growth & Doppler Chips */}
+                                    <div className="grid grid-cols-2 gap-2.5 text-xs">
+                                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">EFW Growth %ile</span>
+                                            <span className="text-base font-black font-mono text-emerald-600 dark:text-emerald-400">48.2th</span>
+                                            <span className="text-[10px] font-semibold text-slate-500 block mt-0.5">Normal velocity</span>
+                                        </div>
+
+                                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Doppler PI</span>
+                                            <span className="text-base font-black font-mono text-sky-600 dark:text-sky-400">0.92</span>
+                                            <span className="text-[10px] font-semibold text-slate-500 block mt-0.5">Normal flow</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Maternal Vitals Chip */}
+                                    <div className="p-2.5 rounded-xl bg-sky-50/50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 flex items-center justify-between text-xs font-semibold">
+                                        <span className="text-slate-600 dark:text-slate-400">Maternal BP / Pulse</span>
+                                        <span className="font-mono font-bold text-sky-700 dark:text-sky-300">118/76 mmHg · {lv.heart_rate} bpm</span>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="pt-2 flex items-center gap-2">
+                                        <button onClick={() => onDownloadReport(p.id, lv)}
+                                            className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-1.5"
+                                            title="Download Patient Clinical Evaluation Report">
+                                            <i className="fa-solid fa-file-arrow-down"></i>
+                                            <span>Report</span>
+                                        </button>
+
+                                        <button onClick={() => onOpenUpload(p.id)}
+                                            className="py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-extrabold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-1.5"
+                                            title="Upload Clinical Document for this Patient">
+                                            <i className="fa-solid fa-cloud-arrow-up"></i>
+                                            <span>Upload</span>
+                                        </button>
+
+                                        <button onClick={() => onSelectPatient(p.id)}
+                                            className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-extrabold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-700">
+                                            <span>Dossier</span>
+                                            <i className="fa-solid fa-chevron-right text-[10px] text-sky-500"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <PriorityPatientsTable
+                    patients={antenatal}
+                    onSelect={onSelectPatient}
+                    onDownloadReport={onDownloadReport}
+                    onOpenUpload={onOpenUpload}
+                    liveVitalsMap={liveVitalsMap}
+                />
+            )}
         </div>
     );
 }
@@ -1775,39 +2340,59 @@ function PregnancyPage({ patients, onSelectPatient, onDownloadReport, onOpenUplo
 // ─── Clean Physician Login Screen ─────────────────────────────────────────────
 function LoginScreen({ onLogin, isDark, toggleTheme }) {
     return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100">
-            <div className="w-full max-w-md">
+        <div className="min-h-screen flex items-center justify-center p-6 relative"
+            style={{
+                background: `linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(10, 37, 64, 0.92) 50%, rgba(15, 23, 42, 0.96) 100%), url('${MEDICAL_IMAGES.loginBg}') center/cover no-repeat`
+            }}>
+            {/* Ambient Background Glows */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="w-full max-w-md relative z-10 animate-fade-in">
+                {/* Branding Header */}
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <i className="fa-solid fa-heart-pulse text-3xl"></i>
+                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-sky-500 via-teal-500 to-indigo-600 text-white flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-sky-500/30 glow-cyan">
+                        <i className="fa-solid fa-heart-pulse text-4xl"></i>
                     </div>
-                    <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">NeoNatal Watch AI</h1>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">Perinatal & NICU Clinical Decision Support Suite</p>
+                    <h1 className="text-3xl font-black text-white tracking-tight">NeoNatal Watch AI</h1>
+                    <p className="text-sm font-semibold text-sky-200/90 mt-1.5">Perinatal & NICU Clinical Decision Support Suite</p>
+
+                    <div className="flex items-center justify-center gap-2 mt-3">
+                        <span className="px-3 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1.5 backdrop-blur-md">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            100Hz Telemetry Stream
+                        </span>
+                        <span className="px-3 py-0.5 rounded-full text-[11px] font-extrabold bg-sky-500/20 text-sky-300 border border-sky-400/30 backdrop-blur-md">
+                            SHAP Explainability
+                        </span>
+                    </div>
                 </div>
 
-                <div className="card p-6 space-y-4 shadow-xl border border-slate-200 dark:border-slate-800 rounded-2xl">
-                    <div className="text-center pb-2 border-b border-slate-200 dark:border-slate-800">
-                        <span className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest">Clinical Access Gateway</span>
+                {/* Gateway Card */}
+                <div className="glass-panel p-8 space-y-5 shadow-2xl rounded-3xl border border-white/20 bg-slate-900/80 backdrop-blur-xl">
+                    <div className="text-center pb-2 border-b border-slate-700/60">
+                        <span className="text-xs font-black text-sky-400 uppercase tracking-widest">Clinical Access Gateway</span>
                     </div>
 
                     <button onClick={() => onLogin('doctor')}
-                        className="w-full bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white p-4 rounded-xl text-left transition shadow-md group">
-                        <div className="flex items-center gap-3.5">
-                            <div className="w-11 h-11 rounded-lg bg-white/20 text-white flex items-center justify-center font-bold text-xl">
+                        className="w-full bg-gradient-to-r from-sky-600 via-teal-600 to-emerald-600 hover:from-sky-500 hover:via-teal-500 hover:to-emerald-500 text-white p-5 rounded-2xl text-left transition-all duration-300 shadow-xl shadow-teal-500/20 group hover:scale-[1.02] active:scale-95 border border-white/20">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold text-2xl shadow-inner">
                                 <i className="fa-solid fa-user-doctor"></i>
                             </div>
                             <div className="flex-1">
-                                <div className="font-extrabold text-white text-base">Attending Physician Portal</div>
-                                <div className="text-xs text-sky-100 mt-0.5">Access patient telemetry, risk forecasts & clinical XAI</div>
+                                <div className="font-black text-white text-base">Attending Physician Portal</div>
+                                <div className="text-xs text-sky-100 font-medium mt-0.5">Access patient telemetry, risk forecasts & clinical XAI</div>
                             </div>
-                            <i className="fa-solid fa-arrow-right text-white group-hover:translate-x-1 transition text-sm"></i>
+                            <i className="fa-solid fa-arrow-right text-white group-hover:translate-x-1.5 transition text-base"></i>
                         </div>
                     </button>
                 </div>
 
-                <div className="flex items-center justify-center mt-6 text-xs text-slate-500 gap-4">
-                    <button onClick={toggleTheme} className="font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1.5">
-                        <i className={`fa-solid ${isDark ? 'fa-sun text-amber-500' : 'fa-moon text-sky-600'}`}></i>
+                {/* Theme Switcher */}
+                <div className="flex items-center justify-center mt-6 text-xs text-slate-400 gap-4">
+                    <button onClick={toggleTheme} className="font-bold text-sky-400 hover:text-sky-300 hover:underline flex items-center gap-2">
+                        <i className={`fa-solid ${isDark ? 'fa-sun text-amber-400' : 'fa-moon text-sky-400'}`}></i>
                         <span>Switch to {isDark ? 'Light' : 'Dark'} Mode</span>
                     </button>
                 </div>

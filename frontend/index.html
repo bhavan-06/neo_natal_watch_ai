@@ -47,63 +47,123 @@
         }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Clean healthcare light theme (default) */
         body {
-            background-color: #f1f5f9; /* soft neutral slate */
-            color: #0f172a;            /* dark charcoal primary */
+            background-color: #f1f5f9;
+            color: #0f172a;
             min-height: 100vh;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
 
-        /* Pure clean card surfaces — NO scanlines, NO glow, NO stripes */
+        /* ── Modern Transition & Keyframe Animations ── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes pulseGlowCyan {
+            0%, 100% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.25); }
+            50% { box-shadow: 0 0 25px rgba(6, 182, 212, 0.55); }
+        }
+        @keyframes pulseGlowRose {
+            0%, 100% { box-shadow: 0 0 15px rgba(244, 63, 94, 0.25); }
+            50% { box-shadow: 0 0 25px rgba(244, 63, 94, 0.55); }
+        }
+        @keyframes ecgScroll {
+            0% { stroke-dashoffset: 400; }
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes floatGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .animate-fade-in { animation: fadeIn 0.35s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-right { animation: slideRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-float { animation: floatGentle 3s ease-in-out infinite; }
+        .glow-cyan { animation: pulseGlowCyan 2.5s infinite ease-in-out; }
+        .glow-rose { animation: pulseGlowRose 2s infinite ease-in-out; }
+
+        .ecg-line {
+            stroke-dasharray: 400;
+            stroke-dashoffset: 400;
+            animation: ecgScroll 2.8s linear infinite;
+        }
+
+        /* ── Visual Card Surfaces & Interactive Polish ── */
         .card {
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+            border-radius: 14px;
+            box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-interactive {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-interactive:hover {
+            transform: translateY(-3px);
+            border-color: #38bdf8;
+            box-shadow: 0 14px 25px -4px rgba(14, 165, 233, 0.12), 0 8px 10px -6px rgba(14, 165, 233, 0.08);
         }
         .card-hover:hover {
-            border-color: #cbd5e1;
-            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.08);
-            transition: all 0.15s ease-in-out;
+            border-color: #94a3b8;
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+            transform: translateY(-2px);
         }
         .card-sm {
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 10px;
         }
 
-        /* Semantic high-contrast status badges (never color alone) */
+        /* Glassmorphic highlights */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        /* Semantic high-contrast status badges */
         .status-stable {
             background-color: #ecfdf5;
             color: #047857;
             border: 1px solid #a7f3d0;
-            font-weight: 600;
+            font-weight: 700;
         }
         .status-attention {
             background-color: #fffbeb;
             color: #92400e;
             border: 1px solid #fde68a;
-            font-weight: 600;
+            font-weight: 700;
         }
         .status-high {
             background-color: #fef2f2;
             color: #991b1b;
             border: 1px solid #fecaca;
-            font-weight: 600;
+            font-weight: 700;
         }
         .status-info {
             background-color: #f0f9ff;
             color: #0369a1;
             border: 1px solid #bae6fd;
-            font-weight: 600;
+            font-weight: 700;
         }
         .status-neutral {
             background-color: #f1f5f9;
             color: #334155;
             border: 1px solid #cbd5e1;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         /* Tab navigation */
@@ -115,7 +175,7 @@
         .tab-inactive {
             border-bottom: 2px solid transparent;
             color: #475569;
-            font-weight: 500;
+            font-weight: 600;
         }
         .tab-inactive:hover {
             color: #0f172a;
@@ -125,21 +185,20 @@
         /* Top Nav Links */
         .nav-active {
             color: #ffffff;
-            background-color: #0284c7;
-            font-weight: 600;
+            background: linear-gradient(135deg, #0284c7, #0d9488);
+            font-weight: 700;
+            box-shadow: 0 4px 10px -2px rgba(2, 132, 199, 0.35);
         }
         .nav-inactive {
             color: #334155;
-            font-weight: 500;
+            font-weight: 600;
         }
         .nav-inactive:hover {
             color: #0f172a;
             background-color: #e2e8f0;
         }
 
-
-
-        /* Custom Scrollbar for eye comfort */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -147,20 +206,29 @@
 
         /* ================= DARK MODE OVERRIDES ================= */
         html.dark body {
-            background-color: #0b1120;
+            background: radial-gradient(circle at top right, #111a2e 0%, #080d19 100%);
             color: #f8fafc;
         }
         html.dark .card {
-            background-color: #131f37;
-            border-color: #233554;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+            background-color: #0f172a;
+            border-color: #1e293b;
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+        }
+        html.dark .card-interactive:hover {
+            border-color: #38bdf8;
+            box-shadow: 0 14px 28px -4px rgba(56, 189, 248, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
         }
         html.dark .card-hover:hover {
             border-color: #38bdf8;
+            box-shadow: 0 10px 18px 0 rgba(0, 0, 0, 0.5);
         }
         html.dark .card-sm {
-            background-color: #0f172a;
-            border-color: #233554;
+            background-color: #162032;
+            border-color: #1e293b;
+        }
+        html.dark .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            border-color: rgba(51, 65, 85, 0.7);
         }
         html.dark .status-stable {
             background-color: #064e3b;
@@ -189,8 +257,9 @@
         }
 
         html.dark .nav-active {
-            background-color: #0284c7;
+            background: linear-gradient(135deg, #0284c7, #0d9488);
             color: #ffffff;
+            box-shadow: 0 4px 14px -2px rgba(2, 132, 199, 0.5);
         }
         html.dark .nav-inactive {
             color: #94a3b8;
@@ -221,6 +290,6 @@
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel" src="app.jsx?v=2.2"></script>
+    <script type="text/babel" src="app.jsx?v=2.3"></script>
 </body>
 </html>
